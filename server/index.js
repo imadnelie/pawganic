@@ -3,7 +3,7 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import cors from "cors";
-import { initDb } from "./db.js";
+import { connectDb, initDb } from "./db.js";
 import authRoutes from "./routes/auth.js";
 import customersRoutes from "./routes/customers.js";
 import ordersRoutes from "./routes/orders.js";
@@ -15,8 +15,6 @@ import usersRoutes from "./routes/users.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = Number(process.env.PORT) || 3001;
-
-initDb();
 
 app.use(
   cors({
@@ -42,6 +40,15 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-app.listen(PORT, () => {
-  console.log(`[pawganic-api] http://localhost:${PORT}`);
+async function start() {
+  await connectDb();
+  await initDb();
+  app.listen(PORT, () => {
+    console.log(`[pawganic-api] http://localhost:${PORT}`);
+  });
+}
+
+start().catch((err) => {
+  console.error("[pawganic-api] Failed to start:", err);
+  process.exit(1);
 });

@@ -66,7 +66,7 @@ export default function Orders() {
       await api("/orders", {
         method: "POST",
         body: {
-          customerId: Number(newForm.customerId),
+          customerId: newForm.customerId,
           items: newForm.items.map((it) => ({
             mealType: it.mealType,
             quantity: Number(it.quantity),
@@ -134,7 +134,7 @@ export default function Orders() {
       await api(`/orders/${editModal.id}`, {
         method: "PUT",
         body: {
-          customerId: Number(editForm.customerId),
+          customerId: editForm.customerId,
           items: editForm.items.map((it) => ({
             mealType: it.mealType,
             quantity: Number(it.quantity),

@@ -1,26 +1,33 @@
 import { Router } from "express";
-import { db } from "../db.js";
+import mongoose from "mongoose";
+import { Order, Customer } from "../db.js";
 import { requireAuth, requireSuperAdmin } from "../middleware/auth.js";
 import { isMealType, isPartner } from "../constants.js";
 
 const r = Router();
 r.use(requireAuth);
 
-function rowToOrder(row) {
+function docToOrder(doc) {
+  const pop = doc.customerId && typeof doc.customerId === "object" && doc.customerId.first_name != null;
+  const c = pop ? doc.customerId : null;
+  const cid = c ? c._id : doc.customerId;
   return {
-    id: row.id,
-    customerId: row.customer_id,
-    customerFirstName: row.customer_first_name,
-    customerLastName: row.customer_last_name,
-    mealType: row.meal_type,
-    quantity: row.quantity,
-    totalPrice: row.total_price,
-    status: row.status,
-    createdBy: row.created_by,
-    deliveredBy: row.delivered_by,
-    paidTo: row.paid_to,
-    createdAt: row.created_at,
-    deliveredAt: row.delivered_at,
+    id: String(doc._id),
+    customerId: String(cid),
+    customerFirstName: c?.first_name ?? "",
+    customerLastName: c?.last_name ?? "",
+    mealType: doc.mealType,
+    quantity: doc.quantity,
+    totalPrice: doc.totalPrice,
+    status: doc.status,
+    createdBy: doc.createdBy,
+    deliveredBy: doc.deliveredBy,
+    paidTo: doc.paidTo,
+    createdAt: doc.createdAt instanceof Date ? doc.createdAt.toISOString() : doc.createdAt,
+    deliveredAt:
+      doc.deliveredAt instanceof Date
+        ? doc.deliveredAt.toISOString()
+        : doc.deliveredAt || null,
   };
 }
 
@@ -40,43 +47,23 @@ function parseItems(itemsInput) {
   return { items };
 }
 
-function getItemsForOrderIds(orderIds) {
-  if (!orderIds.length) return new Map();
-  const placeholders = orderIds.map(() => "?").join(",");
-  const rows = db
-    .prepare(
-      `SELECT id, order_id, meal_type, quantity, price_per_unit, subtotal
-       FROM order_items WHERE order_id IN (${placeholders}) ORDER BY id ASC`
-    )
-    .all(...orderIds);
-  const map = new Map();
-  for (const r of rows) {
-    const list = map.get(r.order_id) || [];
-    list.push({
-      id: r.id,
-      mealType: r.meal_type,
-      quantity: r.quantity,
-      pricePerUnit: r.price_per_unit,
-      subtotal: r.subtotal,
-    });
-    map.set(r.order_id, list);
-  }
-  return map;
-}
-
-function withItems(rows) {
-  const ids = rows.map((r) => r.id);
-  const itemsMap = getItemsForOrderIds(ids);
-  return rows.map((row) => {
-    const base = rowToOrder(row);
-    let items = itemsMap.get(row.id) || [];
+function withItems(docs) {
+  return docs.map((doc) => {
+    const base = docToOrder(doc);
+    let items = (doc.items || []).map((it) => ({
+      id: it._id ? String(it._id) : null,
+      mealType: it.mealType,
+      quantity: it.quantity,
+      pricePerUnit: it.pricePerUnit,
+      subtotal: it.subtotal,
+    }));
     if (!items.length) {
-      const qty = Number(row.quantity) > 0 ? Number(row.quantity) : 1;
-      const subtotal = Number(row.total_price) || 0;
+      const qty = Number(doc.quantity) > 0 ? Number(doc.quantity) : 1;
+      const subtotal = Number(doc.totalPrice) || 0;
       items = [
         {
           id: null,
-          mealType: row.meal_type,
+          mealType: doc.mealType,
           quantity: qty,
           pricePerUnit: qty > 0 ? subtotal / qty : subtotal,
           subtotal,
@@ -87,180 +74,185 @@ function withItems(rows) {
   });
 }
 
-r.get("/", (req, res) => {
-  const { status, createdBy } = req.query;
-  let sql = `SELECT o.*, c.first_name AS customer_first_name, c.last_name AS customer_last_name
-    FROM orders o JOIN customers c ON c.id = o.customer_id WHERE 1=1`;
-  const params = [];
-  if (status === "pending" || status === "delivered") {
-    sql += " AND o.status = ?";
-    params.push(status);
-  }
-  if (createdBy && isPartner(String(createdBy).toLowerCase())) {
-    sql += " AND o.created_by = ?";
-    params.push(String(createdBy).toLowerCase());
-  }
-  sql += " ORDER BY o.created_at DESC";
-  const rows = db.prepare(sql).all(...params);
-  res.json(withItems(rows));
-});
+const populateCustomer = { path: "customerId", select: "first_name last_name" };
 
-r.get("/customer/:customerId", (req, res) => {
-  const customerId = Number(req.params.customerId);
-  const rows = db
-    .prepare(
-      `SELECT o.*, c.first_name AS customer_first_name, c.last_name AS customer_last_name
-       FROM orders o JOIN customers c ON c.id = o.customer_id
-       WHERE o.customer_id = ? ORDER BY o.created_at DESC`
-    )
-    .all(customerId);
-  res.json(withItems(rows));
-});
-
-r.post("/", (req, res) => {
-  const { customerId, items: itemsInput } = req.body || {};
-  const parsed = parseItems(itemsInput);
-  if (parsed.error) return res.status(400).json({ error: parsed.error });
-  const items = parsed.items;
-  const totalPrice = items.reduce((s, i) => s + i.subtotal, 0);
-  const cust = db.prepare("SELECT id FROM customers WHERE id = ?").get(Number(customerId));
-  if (!cust) return res.status(400).json({ error: "Customer not found" });
-  const username = req.user.username.toLowerCase();
-  if (!isPartner(username)) {
-    return res.status(400).json({ error: "Invalid session user for created_by" });
-  }
-  const first = items[0];
-  const totalQty = items.reduce((s, i) => s + i.quantity, 0);
-  const insertOrder = db.prepare(
-    `INSERT INTO orders (customer_id, meal_type, quantity, total_price, status, created_by)
-     VALUES (?, ?, ?, ?, 'pending', ?)`
-  );
-  const insertItem = db.prepare(
-    `INSERT INTO order_items (order_id, meal_type, quantity, price_per_unit, subtotal)
-     VALUES (?, ?, ?, ?, ?)`
-  );
-  const info = db.transaction(() => {
-    const orderInfo = insertOrder.run(Number(customerId), first.mealType, totalQty, totalPrice, username);
-    const orderId = Number(orderInfo.lastInsertRowid);
-    for (const it of items) {
-      insertItem.run(orderId, it.mealType, it.quantity, it.pricePerUnit, it.subtotal);
+r.get("/", async (req, res) => {
+  try {
+    const { status, createdBy } = req.query;
+    const filter = {};
+    if (status === "pending" || status === "delivered") {
+      filter.status = status;
     }
-    return orderInfo;
-  })();
-  const row = db
-    .prepare(
-      `SELECT o.*, c.first_name AS customer_first_name, c.last_name AS customer_last_name
-       FROM orders o JOIN customers c ON c.id = o.customer_id WHERE o.id = ?`
-    )
-    .get(info.lastInsertRowid);
-  res.status(201).json(withItems([row])[0]);
+    if (createdBy && isPartner(String(createdBy).toLowerCase())) {
+      filter.createdBy = String(createdBy).toLowerCase();
+    }
+    const docs = await Order.find(filter).populate(populateCustomer).sort({ createdAt: -1 }).lean();
+    res.json(withItems(docs));
+  } catch (e) {
+    res.status(500).json({ error: e.message || "Server error" });
+  }
 });
 
-r.post("/:id/deliver", (req, res) => {
-  const id = Number(req.params.id);
-  const { paidTo, deliveredDate } = req.body || {};
-  const pTo = String(paidTo || "").toLowerCase();
-  if (!isPartner(pTo)) {
-    return res.status(400).json({ error: "paidTo must be elie or jimmy" });
+r.get("/customer/:customerId", async (req, res) => {
+  try {
+    const customerId = req.params.customerId;
+    if (!mongoose.isValidObjectId(customerId)) {
+      return res.status(400).json({ error: "Invalid customer id" });
+    }
+    const docs = await Order.find({ customerId })
+      .populate(populateCustomer)
+      .sort({ createdAt: -1 })
+      .lean();
+    res.json(withItems(docs));
+  } catch (e) {
+    res.status(500).json({ error: e.message || "Server error" });
   }
-  const dateText = String(deliveredDate || "").trim();
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateText)) {
-    return res.status(400).json({ error: "deliveredDate is required (YYYY-MM-DD)" });
-  }
-  const order = db.prepare("SELECT * FROM orders WHERE id = ?").get(id);
-  if (!order) return res.status(404).json({ error: "Order not found" });
-  if (order.status === "delivered") {
-    return res.status(400).json({ error: "Order already delivered" });
-  }
-  // Save a stable ISO timestamp based on the selected date.
-  const deliveredAt = new Date(`${dateText}T12:00:00.000Z`).toISOString();
-  db.prepare(
-    `UPDATE orders SET status = 'delivered', delivered_by = ?, paid_to = ?, delivered_at = ?
-     WHERE id = ?`
-  ).run(null, pTo, deliveredAt, id);
-  const row = db
-    .prepare(
-      `SELECT o.*, c.first_name AS customer_first_name, c.last_name AS customer_last_name
-       FROM orders o JOIN customers c ON c.id = o.customer_id WHERE o.id = ?`
-    )
-    .get(id);
-  res.json(withItems([row])[0]);
 });
 
-r.put("/:id", requireSuperAdmin, (req, res) => {
-  const id = Number(req.params.id);
-  const order = db.prepare("SELECT * FROM orders WHERE id = ?").get(id);
-  if (!order) return res.status(404).json({ error: "Order not found" });
-
-  const { customerId, items: itemsInput, status, paidTo, deliveredDate } =
-    req.body || {};
-  const cid = Number(customerId);
-  const parsed = parseItems(itemsInput);
-  if (parsed.error) return res.status(400).json({ error: parsed.error });
-  const items = parsed.items;
-  const totalPrice = items.reduce((s, i) => s + i.subtotal, 0);
-  const totalQty = items.reduce((s, i) => s + i.quantity, 0);
-  const first = items[0];
-  const s = String(status || "").toLowerCase();
-  if (
-    !Number.isFinite(cid) ||
-    !["pending", "delivered"].includes(s)
-  ) {
-    return res.status(400).json({ error: "Invalid order data" });
+r.post("/", async (req, res) => {
+  try {
+    const { customerId, items: itemsInput } = req.body || {};
+    const parsed = parseItems(itemsInput);
+    if (parsed.error) return res.status(400).json({ error: parsed.error });
+    const items = parsed.items;
+    const totalPrice = items.reduce((s, i) => s + i.subtotal, 0);
+    if (!mongoose.isValidObjectId(String(customerId))) {
+      return res.status(400).json({ error: "Customer not found" });
+    }
+    const cust = await Customer.findById(customerId).select("_id").lean();
+    if (!cust) return res.status(400).json({ error: "Customer not found" });
+    const username = req.user.username.toLowerCase();
+    if (!isPartner(username)) {
+      return res.status(400).json({ error: "Invalid session user for created_by" });
+    }
+    const first = items[0];
+    const totalQty = items.reduce((s, i) => s + i.quantity, 0);
+    const order = await Order.create({
+      customerId: cust._id,
+      mealType: first.mealType,
+      quantity: totalQty,
+      totalPrice,
+      status: "pending",
+      createdBy: username,
+      items: items.map((it) => ({
+        mealType: it.mealType,
+        quantity: it.quantity,
+        pricePerUnit: it.pricePerUnit,
+        subtotal: it.subtotal,
+      })),
+    });
+    const populated = await Order.findById(order._id).populate(populateCustomer).lean();
+    res.status(201).json(withItems([populated])[0]);
+  } catch (e) {
+    res.status(500).json({ error: e.message || "Server error" });
   }
-  const cust = db.prepare("SELECT id FROM customers WHERE id = ?").get(cid);
-  if (!cust) return res.status(400).json({ error: "Customer not found" });
+});
 
-  let pTo = null;
-  let deliveredAt = null;
-  if (s === "delivered") {
-    pTo = String(paidTo || "").toLowerCase();
+r.post("/:id/deliver", async (req, res) => {
+  try {
+    const id = req.params.id;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ error: "Invalid order id" });
+    }
+    const { paidTo, deliveredDate } = req.body || {};
+    const pTo = String(paidTo || "").toLowerCase();
+    if (!isPartner(pTo)) {
+      return res.status(400).json({ error: "paidTo must be elie or jimmy" });
+    }
     const dateText = String(deliveredDate || "").trim();
-    if (!isPartner(pTo) || !/^\d{4}-\d{2}-\d{2}$/.test(dateText)) {
-      return res
-        .status(400)
-        .json({ error: "Delivered orders require paidTo and deliveredDate" });
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateText)) {
+      return res.status(400).json({ error: "deliveredDate is required (YYYY-MM-DD)" });
     }
-    deliveredAt = new Date(`${dateText}T12:00:00.000Z`).toISOString();
+    const order = await Order.findById(id).lean();
+    if (!order) return res.status(404).json({ error: "Order not found" });
+    if (order.status === "delivered") {
+      return res.status(400).json({ error: "Order already delivered" });
+    }
+    const deliveredAt = new Date(`${dateText}T12:00:00.000Z`);
+    await Order.findByIdAndUpdate(id, {
+      status: "delivered",
+      deliveredBy: null,
+      paidTo: pTo,
+      deliveredAt,
+    });
+    const populated = await Order.findById(id).populate(populateCustomer).lean();
+    res.json(withItems([populated])[0]);
+  } catch (e) {
+    res.status(500).json({ error: e.message || "Server error" });
   }
-
-  const updateOrder = db.prepare(
-    `UPDATE orders SET
-      customer_id = ?, meal_type = ?, quantity = ?, total_price = ?, status = ?,
-      delivered_by = ?, paid_to = ?, delivered_at = ?
-     WHERE id = ?`
-  );
-  const deleteItems = db.prepare("DELETE FROM order_items WHERE order_id = ?");
-  const insertItem = db.prepare(
-    `INSERT INTO order_items (order_id, meal_type, quantity, price_per_unit, subtotal)
-     VALUES (?, ?, ?, ?, ?)`
-  );
-  db.transaction(() => {
-    updateOrder.run(cid, first.mealType, totalQty, totalPrice, s, null, pTo, deliveredAt, id);
-    deleteItems.run(id);
-    for (const it of items) {
-      insertItem.run(id, it.mealType, it.quantity, it.pricePerUnit, it.subtotal);
-    }
-  })();
-
-  const row = db
-    .prepare(
-      `SELECT o.*, c.first_name AS customer_first_name, c.last_name AS customer_last_name
-       FROM orders o JOIN customers c ON c.id = o.customer_id WHERE o.id = ?`
-    )
-    .get(id);
-  return res.json(withItems([row])[0]);
 });
 
-r.delete("/:id", requireSuperAdmin, (req, res) => {
-  const id = Number(req.params.id);
-  if (!Number.isFinite(id) || id < 1) {
-    return res.status(400).json({ error: "Invalid order id" });
+r.put("/:id", requireSuperAdmin, async (req, res) => {
+  try {
+    const id = req.params.id;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+    const order = await Order.findById(id).lean();
+    if (!order) return res.status(404).json({ error: "Order not found" });
+
+    const { customerId, items: itemsInput, status, paidTo, deliveredDate } = req.body || {};
+    const cid = String(customerId);
+    const parsed = parseItems(itemsInput);
+    if (parsed.error) return res.status(400).json({ error: parsed.error });
+    const items = parsed.items;
+    const totalPrice = items.reduce((s, i) => s + i.subtotal, 0);
+    const totalQty = items.reduce((s, i) => s + i.quantity, 0);
+    const first = items[0];
+    const s = String(status || "").toLowerCase();
+    if (!mongoose.isValidObjectId(cid) || !["pending", "delivered"].includes(s)) {
+      return res.status(400).json({ error: "Invalid order data" });
+    }
+    const cust = await Customer.findById(cid).select("_id").lean();
+    if (!cust) return res.status(400).json({ error: "Customer not found" });
+
+    let pTo = null;
+    let deliveredAt = null;
+    if (s === "delivered") {
+      pTo = String(paidTo || "").toLowerCase();
+      const dateText = String(deliveredDate || "").trim();
+      if (!isPartner(pTo) || !/^\d{4}-\d{2}-\d{2}$/.test(dateText)) {
+        return res.status(400).json({ error: "Delivered orders require paidTo and deliveredDate" });
+      }
+      deliveredAt = new Date(`${dateText}T12:00:00.000Z`);
+    }
+
+    await Order.findByIdAndUpdate(id, {
+      customerId: cust._id,
+      mealType: first.mealType,
+      quantity: totalQty,
+      totalPrice,
+      status: s,
+      deliveredBy: null,
+      paidTo: pTo,
+      deliveredAt,
+      items: items.map((it) => ({
+        mealType: it.mealType,
+        quantity: it.quantity,
+        pricePerUnit: it.pricePerUnit,
+        subtotal: it.subtotal,
+      })),
+    });
+
+    const populated = await Order.findById(id).populate(populateCustomer).lean();
+    return res.json(withItems([populated])[0]);
+  } catch (e) {
+    res.status(500).json({ error: e.message || "Server error" });
   }
-  const existing = db.prepare("SELECT id FROM orders WHERE id = ?").get(id);
-  if (!existing) return res.status(404).json({ error: "Order not found" });
-  db.prepare("DELETE FROM orders WHERE id = ?").run(id);
-  return res.status(204).send();
+});
+
+r.delete("/:id", requireSuperAdmin, async (req, res) => {
+  try {
+    const id = req.params.id;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ error: "Invalid order id" });
+    }
+    const existing = await Order.findByIdAndDelete(id);
+    if (!existing) return res.status(404).json({ error: "Order not found" });
+    return res.status(204).send();
+  } catch (e) {
+    res.status(500).json({ error: e.message || "Server error" });
+  }
 });
 
 export default r;

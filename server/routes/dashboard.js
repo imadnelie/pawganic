@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db } from "../db.js";
+import { Customer, Order, Expense } from "../db.js";
 import { requireAuth } from "../middleware/auth.js";
 
 const r = Router();
@@ -10,69 +10,101 @@ function num(v) {
   return Number.isFinite(x) ? x : 0;
 }
 
-/** Single aggregate via .pluck().get() — avoids SQLite/driver column-name mismatches on .get(). */
-function sumPluck(sql, params = []) {
-  return num(db.prepare(sql).pluck().get(...params));
-}
+r.get("/summary", async (req, res) => {
+  try {
+    const customers = await Customer.countDocuments();
 
-r.get("/summary", (req, res) => {
-  const customers = sumPluck(`SELECT COUNT(*) FROM customers`);
-  const ordersPending = sumPluck(`SELECT COUNT(*) FROM orders WHERE LOWER(TRIM(status)) = 'pending'`);
-  const ordersDelivered = sumPluck(`SELECT COUNT(*) FROM orders WHERE LOWER(TRIM(status)) = 'delivered'`);
+    const ordersPending = await Order.countDocuments({ status: "pending" });
+    const ordersDelivered = await Order.countDocuments({ status: "delivered" });
 
-  const totalRevenue = sumPluck(
-    `SELECT COALESCE(SUM(total_price), 0) FROM orders WHERE LOWER(TRIM(status)) = 'delivered'`
-  );
+    const [revAgg] = await Order.aggregate([
+      { $match: { status: "delivered" } },
+      {
+        $addFields: {
+          receiver: {
+            $toLower: {
+              $trim: {
+                input: { $ifNull: ["$paidTo", { $ifNull: ["$deliveredBy", ""] }] },
+              },
+            },
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: "$totalPrice" },
+          revenueToElie: { $sum: { $cond: [{ $eq: ["$receiver", "elie"] }, "$totalPrice", 0] } },
+          revenueToJimmy: { $sum: { $cond: [{ $eq: ["$receiver", "jimmy"] }, "$totalPrice", 0] } },
+        },
+      },
+    ]);
 
-  const receiver = `LOWER(TRIM(COALESCE(paid_to, delivered_by)))`;
-  const revenueToElie = sumPluck(
-    `SELECT COALESCE(SUM(total_price), 0) FROM orders WHERE LOWER(TRIM(status)) = 'delivered' AND ${receiver} = 'elie'`
-  );
-  const revenueToJimmy = sumPluck(
-    `SELECT COALESCE(SUM(total_price), 0) FROM orders WHERE LOWER(TRIM(status)) = 'delivered' AND ${receiver} = 'jimmy'`
-  );
+    const [expAgg] = await Expense.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalExpenses: { $sum: "$amount" },
+          expensesPaidByElie: {
+            $sum: {
+              $cond: [{ $eq: [{ $toLower: { $trim: { input: "$paid_by" } } }, "elie"] }, "$amount", 0],
+            },
+          },
+          expensesPaidByJimmy: {
+            $sum: {
+              $cond: [{ $eq: [{ $toLower: { $trim: { input: "$paid_by" } } }, "jimmy"] }, "$amount", 0],
+            },
+          },
+        },
+      },
+    ]);
 
-  const totalExpenses = sumPluck(`SELECT COALESCE(SUM(amount), 0) FROM expenses`);
-  const expensesPaidByElie = sumPluck(
-    `SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE LOWER(TRIM(paid_by)) = 'elie'`
-  );
-  const expensesPaidByJimmy = sumPluck(
-    `SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE LOWER(TRIM(paid_by)) = 'jimmy'`
-  );
+    const totalRevenue = num(revAgg?.totalRevenue);
+    const revenueToElie = num(revAgg?.revenueToElie);
+    const revenueToJimmy = num(revAgg?.revenueToJimmy);
+    const totalExpenses = num(expAgg?.totalExpenses);
+    const expensesPaidByElie = num(expAgg?.expensesPaidByElie);
+    const expensesPaidByJimmy = num(expAgg?.expensesPaidByJimmy);
 
-  const byMealRows = db
-    .prepare(
-      `SELECT oi.meal_type, COUNT(*) AS cnt, COALESCE(SUM(oi.subtotal), 0) AS rev
-       FROM order_items oi
-       JOIN orders o ON o.id = oi.order_id
-       WHERE LOWER(TRIM(o.status)) = 'delivered'
-       GROUP BY oi.meal_type`
-    )
-    .all();
-  const revenueByMeal = byMealRows.map((row) => ({
-    mealType: row.meal_type,
-    count: row.cnt,
-    revenue: num(row.rev),
-  }));
+    const byMealRows = await Order.aggregate([
+      { $match: { status: "delivered" } },
+      { $unwind: "$items" },
+      {
+        $group: {
+          _id: "$items.mealType",
+          cnt: { $sum: 1 },
+          rev: { $sum: "$items.subtotal" },
+        },
+      },
+    ]);
 
-  const elieNetPosition = revenueToElie - expensesPaidByElie;
-  const jimmyNetPosition = revenueToJimmy - expensesPaidByJimmy;
+    const revenueByMeal = byMealRows.map((row) => ({
+      mealType: row._id,
+      count: row.cnt,
+      revenue: num(row.rev),
+    }));
 
-  res.json({
-    customers,
-    ordersPending,
-    ordersDelivered,
-    totalRevenue,
-    revenueToElie,
-    revenueToJimmy,
-    totalExpenses,
-    expensesPaidByElie,
-    expensesPaidByJimmy,
-    elieNetPosition,
-    jimmyNetPosition,
-    netProfit: totalRevenue - totalExpenses,
-    revenueByMeal,
-  });
+    const elieNetPosition = revenueToElie - expensesPaidByElie;
+    const jimmyNetPosition = revenueToJimmy - expensesPaidByJimmy;
+
+    res.json({
+      customers,
+      ordersPending,
+      ordersDelivered,
+      totalRevenue,
+      revenueToElie,
+      revenueToJimmy,
+      totalExpenses,
+      expensesPaidByElie,
+      expensesPaidByJimmy,
+      elieNetPosition,
+      jimmyNetPosition,
+      netProfit: totalRevenue - totalExpenses,
+      revenueByMeal,
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message || "Server error" });
+  }
 });
 
 export default r;
