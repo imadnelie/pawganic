@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { api } from "../../api.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { canManageCustomers } from "../../lib/authz.js";
@@ -13,6 +13,7 @@ function money(n) {
 export default function CustomerDetail() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { setPageTitle } = useOutletContext() || {};
   const canEdit = canManageCustomers(user);
   const { id } = useParams();
   const [customer, setCustomer] = useState(null);
@@ -47,6 +48,13 @@ export default function CustomerDetail() {
       cancelled = true;
     };
   }, [id]);
+
+  useEffect(() => {
+    if (!customer) return undefined;
+    const label = `${customer.first_name} ${customer.last_name}`;
+    setPageTitle?.(label);
+    return () => setPageTitle?.(null);
+  }, [customer, setPageTitle]);
 
   const saveCustomer = async (e) => {
     e.preventDefault();
@@ -85,14 +93,17 @@ export default function CustomerDetail() {
 
   return (
     <div>
-      <Link to="/admin/customers" className="text-sm font-medium text-forest hover:underline">
+      <Link
+        to="/admin/customers"
+        className="inline-flex min-h-[44px] items-center text-sm font-medium text-forest hover:underline lg:min-h-0"
+      >
         ← Customers
       </Link>
 
-      <h1 className="mt-4 text-2xl font-semibold text-slate-900">
+      <h1 className="mt-2 hidden text-2xl font-semibold text-slate-900 lg:mt-4 lg:block">
         {customer.first_name} {customer.last_name}
       </h1>
-      <p className="mt-1 text-sm text-slate-500">{customer.mobile}</p>
+      <p className="mt-1 text-sm text-slate-500 lg:mt-1">{customer.mobile}</p>
       {customer.lat != null && customer.lng != null ? (
         <a
           href={`https://www.google.com/maps?q=${customer.lat},${customer.lng}`}
@@ -104,20 +115,20 @@ export default function CustomerDetail() {
         </a>
       ) : null}
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-2">
-        <div>
-          <h2 className="text-sm font-semibold text-slate-900">
+      <div className="mt-6 grid grid-cols-1 gap-8 lg:mt-8 lg:grid-cols-2">
+        <div className="min-w-0">
+          <h2 className="text-base font-semibold text-slate-900 lg:text-sm">
             {canEdit ? "Edit customer" : "Customer details"}
           </h2>
           {err ? <p className="mt-2 text-sm text-red-600">{err}</p> : null}
-          <form onSubmit={saveCustomer} className="mt-3 space-y-3">
-            <div className="grid gap-3 sm:grid-cols-2">
+          <form onSubmit={saveCustomer} className="mt-4 space-y-4 lg:mt-3 lg:space-y-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-3">
               <div>
                 <label className="text-xs font-medium text-slate-600">First name</label>
                 <input
                   required
                   disabled={!canEdit}
-                  className="mt-1 block w-full rounded-lg border-slate-300 text-sm"
+                  className="mt-1 block min-h-[44px] w-full rounded-lg border-slate-300 text-base sm:min-h-0 sm:text-sm"
                   value={form.firstName}
                   onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
                 />
@@ -127,7 +138,7 @@ export default function CustomerDetail() {
                 <input
                   required
                   disabled={!canEdit}
-                  className="mt-1 block w-full rounded-lg border-slate-300 text-sm"
+                  className="mt-1 block min-h-[44px] w-full rounded-lg border-slate-300 text-base sm:min-h-0 sm:text-sm"
                   value={form.lastName}
                   onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
                 />
@@ -138,17 +149,17 @@ export default function CustomerDetail() {
               <input
                 required
                 disabled={!canEdit}
-                className="mt-1 block w-full rounded-lg border-slate-300 text-sm"
+                className="mt-1 block min-h-[44px] w-full rounded-lg border-slate-300 text-base sm:min-h-0 sm:text-sm"
                 value={form.mobile}
                 onChange={(e) => setForm((f) => ({ ...f, mobile: e.target.value }))}
               />
             </div>
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-2">
               <div>
                 <label className="text-xs font-medium text-slate-600">Latitude</label>
                 <input
                   disabled={!canEdit}
-                  className="mt-1 block w-full rounded-lg border-slate-300 text-sm"
+                  className="mt-1 block min-h-[44px] w-full rounded-lg border-slate-300 text-base sm:min-h-0 sm:text-sm"
                   value={form.lat}
                   onChange={(e) => setForm((f) => ({ ...f, lat: e.target.value }))}
                 />
@@ -157,7 +168,7 @@ export default function CustomerDetail() {
                 <label className="text-xs font-medium text-slate-600">Longitude</label>
                 <input
                   disabled={!canEdit}
-                  className="mt-1 block w-full rounded-lg border-slate-300 text-sm"
+                  className="mt-1 block min-h-[44px] w-full rounded-lg border-slate-300 text-base sm:min-h-0 sm:text-sm"
                   value={form.lng}
                   onChange={(e) => setForm((f) => ({ ...f, lng: e.target.value }))}
                 />
@@ -166,7 +177,7 @@ export default function CustomerDetail() {
             {canEdit ? (
               <button
                 type="submit"
-                className="rounded-lg bg-forest px-4 py-2 text-sm font-semibold text-white hover:bg-forest/90"
+                className="w-full rounded-lg bg-forest px-4 py-3 text-sm font-semibold text-white hover:bg-forest/90 sm:w-auto sm:py-2.5"
               >
                 Save changes
               </button>
@@ -174,10 +185,10 @@ export default function CustomerDetail() {
           </form>
         </div>
 
-        <div>
-          <h2 className="text-sm font-semibold text-slate-900">Order history</h2>
-          <div className="mt-3 overflow-hidden rounded-xl border border-slate-200">
-            <table className="min-w-full divide-y divide-slate-200 text-sm">
+        <div className="min-w-0">
+          <h2 className="text-base font-semibold text-slate-900 lg:text-sm">Order history</h2>
+          <div className="mt-3 overflow-x-auto rounded-xl border border-slate-200 [-webkit-overflow-scrolling:touch]">
+            <table className="min-w-[560px] w-full divide-y divide-slate-200 text-sm">
               <thead className="bg-slate-50">
                 <tr>
                   <th className="px-3 py-2 text-left font-semibold text-slate-700">Items</th>

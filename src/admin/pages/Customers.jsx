@@ -86,16 +86,18 @@ export default function Customers() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Customers</h1>
-          <p className="mt-1 text-sm text-slate-500">Manage customer profiles and locations</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+        <div className="min-w-0 flex-1">
+          <h1 className="hidden text-2xl font-semibold text-slate-900 lg:block">Customers</h1>
+          <p className="mt-0 text-sm leading-relaxed text-slate-500 lg:mt-1">
+            Manage customer profiles and locations
+          </p>
         </div>
         {canEdit ? (
           <button
             type="button"
             onClick={() => setModal(true)}
-            className="rounded-lg bg-forest px-4 py-2 text-sm font-semibold text-white hover:bg-forest/90"
+            className="w-full shrink-0 rounded-lg bg-forest px-4 py-3 text-sm font-semibold text-white hover:bg-forest/90 sm:w-auto sm:py-2"
           >
             Add customer
           </button>
@@ -105,38 +107,38 @@ export default function Customers() {
       {err && !modal ? <p className="mt-4 text-sm text-red-600">{err}</p> : null}
       {success ? <p className="mt-4 text-sm text-emerald-700">{success}</p> : null}
 
-      <div className="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-slate-200 text-sm">
+      <div className="mt-5 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm [-webkit-overflow-scrolling:touch] sm:mt-6">
+        <table className="min-w-[600px] w-full divide-y divide-slate-200 text-sm">
           <thead className="bg-slate-50">
             <tr>
-              <th className="px-4 py-3 text-left font-semibold text-slate-700">Name</th>
-              <th className="px-4 py-3 text-left font-semibold text-slate-700">Mobile</th>
-              <th className="px-4 py-3 text-left font-semibold text-slate-700">Location</th>
-              <th className="px-4 py-3 text-left font-semibold text-slate-700">Orders</th>
-              <th className="px-4 py-3" />
+              <th className="px-3 py-3 text-left font-semibold text-slate-700 sm:px-4">Name</th>
+              <th className="px-3 py-3 text-left font-semibold text-slate-700 sm:px-4">Mobile</th>
+              <th className="px-3 py-3 text-left font-semibold text-slate-700 sm:px-4">Location</th>
+              <th className="px-3 py-3 text-left font-semibold text-slate-700 sm:px-4">Orders</th>
+              <th className="px-3 py-3 sm:px-4" />
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {loading ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={5} className="px-3 py-8 text-center text-slate-500 sm:px-4">
                   Loading…
                 </td>
               </tr>
             ) : rows.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={5} className="px-3 py-8 text-center text-slate-500 sm:px-4">
                   No customers yet.
                 </td>
               </tr>
             ) : (
               sortedRows.map((c) => (
                 <tr key={c.id} className="hover:bg-slate-50">
-                  <td className="px-4 py-3 font-medium text-slate-900">
+                  <td className="px-3 py-3.5 font-medium text-slate-900 sm:px-4 sm:py-3">
                     {c.first_name} {c.last_name}
                   </td>
-                  <td className="px-4 py-3 text-slate-600">{c.mobile}</td>
-                  <td className="px-4 py-3 text-slate-600">
+                  <td className="px-3 py-3.5 text-slate-600 sm:px-4 sm:py-3">{c.mobile}</td>
+                  <td className="px-3 py-3.5 text-slate-600 sm:px-4 sm:py-3">
                     {c.lat != null && c.lng != null ? (
                       <a
                         href={`https://www.google.com/maps?q=${c.lat},${c.lng}`}
@@ -150,12 +152,12 @@ export default function Customers() {
                       "—"
                     )}
                   </td>
-                  <td className="px-4 py-3 text-slate-600">{c.order_count}</td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-3 py-3.5 text-slate-600 sm:px-4 sm:py-3">{c.order_count}</td>
+                  <td className="whitespace-nowrap px-3 py-3.5 text-right sm:px-4 sm:py-3">
                     <div className="flex items-center justify-end gap-3">
                       <Link
                         to={`/admin/customers/${c.id}`}
-                        className="font-medium text-forest hover:underline"
+                        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg px-2 text-sm font-medium text-forest hover:bg-forest/5 hover:underline sm:min-h-0 sm:min-w-0 sm:px-0 sm:hover:bg-transparent"
                       >
                         View
                       </Link>
@@ -163,7 +165,7 @@ export default function Customers() {
                         <button
                           type="button"
                           onClick={() => deleteCustomer(c)}
-                          className="font-medium text-rose-700 hover:underline"
+                          className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg px-2 text-sm font-medium text-rose-700 hover:bg-rose-50 hover:underline sm:min-h-0 sm:min-w-0 sm:px-0 sm:hover:bg-transparent"
                         >
                           Delete
                         </button>
