@@ -1,6 +1,18 @@
 const TOKEN_KEY = "pawganic_token";
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || "/api").replace(/\/+$/, "");
 
+function isNetworkFetchError(err) {
+  if (!err) return false;
+  const name = String(err.name || "");
+  const msg = String(err.message || err).toLowerCase();
+  return (
+    name === "TypeError" ||
+    msg.includes("failed to fetch") ||
+    msg.includes("load failed") ||
+    msg.includes("networkerror")
+  );
+}
+
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY);
 }
@@ -19,7 +31,20 @@ export async function api(path, options = {}) {
     options.body = JSON.stringify(options.body);
   }
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  const res = await fetch(`${API_BASE}${normalizedPath}`, { ...options, headers });
+  const url = `${API_BASE}${normalizedPath}`;
+  let res;
+  try {
+    res = await fetch(url, { ...options, headers });
+  } catch (err) {
+    if (isNetworkFetchError(err)) {
+      const hint =
+        API_BASE.startsWith("http") && !API_BASE.includes("localhost") && !API_BASE.includes("127.0.0.1")
+          ? ` Tried ${url}. If you are on another device, use your computer’s LAN IP instead of localhost in VITE_API_BASE_URL.`
+          : " Start the API (port 3001): from the project folder run `npm run dev` (Vite + API) or `npm run dev:server` with `MONGODB_URI` set in `.env`.";
+      throw new Error(`Cannot reach the server.${hint}`);
+    }
+    throw err;
+  }
   const text = await res.text();
   let data = null;
   try {
