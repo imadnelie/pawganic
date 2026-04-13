@@ -37,8 +37,6 @@ const forgotLimiter = rateLimit({
   keyGenerator: rateLimitKey,
 });
 
-r.use(authLimiter);
-
 function userPayload(userDoc) {
   if (!userDoc?._id) {
     throw new Error("Invalid user record");
@@ -61,7 +59,7 @@ function passwordMatches(storedHash, plainPassword) {
   }
 }
 
-r.post("/login", async (req, res) => {
+r.post("/login", authLimiter, async (req, res) => {
   try {
     const { username, password } = req.body || {};
     if (!username || !password) {
@@ -88,7 +86,7 @@ r.post("/login", async (req, res) => {
   }
 });
 
-r.post("/verify-2fa", async (req, res) => {
+r.post("/verify-2fa", authLimiter, async (req, res) => {
   try {
     const { twoFactorToken, code } = req.body || {};
     if (!twoFactorToken || !code) {
@@ -200,6 +198,7 @@ r.post("/reset-password", async (req, res) => {
     });
     return res.json({ ok: true });
   } catch (e) {
+    console.error("[auth] reset-password:", e);
     res.status(500).json({ error: e.message || "Server error" });
   }
 });

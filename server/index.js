@@ -44,7 +44,15 @@ app.use((err, req, res, next) => {
     return;
   }
   const status = Number(err.status || err.statusCode) || 500;
-  res.status(status).json({ error: err.message || "Server error" });
+  const message = err?.message || err?.name || "Server error";
+  const body = { error: message };
+  if (process.env.NODE_ENV !== "production" && err?.stack) {
+    body.detail = String(err.stack)
+      .split("\n")
+      .slice(0, 15)
+      .join("\n");
+  }
+  res.status(status).json(body);
 });
 
 const distPath = path.join(__dirname, "..", "dist");

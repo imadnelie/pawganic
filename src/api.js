@@ -53,7 +53,17 @@ export async function api(path, options = {}) {
     data = { raw: text };
   }
   if (!res.ok) {
-    let msg = data?.error;
+    let msg =
+      typeof data?.error === "string"
+        ? data.error
+        : data?.error != null
+          ? String(data.error)
+          : null;
+    if (typeof data?.detail === "string" && data.detail.trim()) {
+      msg = msg ? `${msg}\n${data.detail}` : data.detail;
+    }
+    if (!msg && typeof data?.message === "string") msg = data.message;
+
     if (!msg && res.status === 404 && typeof data?.raw === "string") {
       if (
         data.raw.includes("Cannot PUT") ||
@@ -70,7 +80,23 @@ export async function api(path, options = {}) {
     }
     if (!msg && res.status >= 500 && typeof data?.raw === "string" && data.raw.includes("<!DOCTYPE")) {
       msg =
-        "Server error (non-JSON response). Check the API terminal for [api] logs—often MongoDB connection, schema mismatch, or an unhandled exception.";
+        "Server error (non-JSON HTML page). Check the API terminal for [api] logs—often an uncaught exception before JSON middleware runs.";
+    }
+    if (!msg || msg === "Internal Server Error") {
+      const flat = String(text || "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 500);
+      if (flat.startsWith("{")) {
+        try {
+          const j = JSON.parse(String(text));
+          if (j?.error) msg = j.detail ? `${j.error}\n${j.detail}` : String(j.error);
+        } catch {
+          /* ignore */
+        }
+      } else if (flat) {
+        msg = `HTTP ${res.status}: ${flat}`;
+      }
     }
     msg =
       msg ||
