@@ -1,10 +1,9 @@
 import { Router } from "express";
 import { Order, Expense } from "../db.js";
-import { requireAuth, requireAdmin } from "../middleware/auth.js";
+import { requireAuth, requireAdminOrUser } from "../middleware/auth.js";
 
 const r = Router();
 r.use(requireAuth);
-r.use(requireAdmin);
 
 function num(v) {
   const x = Number(v);
@@ -12,7 +11,7 @@ function num(v) {
 }
 
 /** Revenue only from delivered orders. Settlement: each partner's fair net = netProfit/2 vs (received - expenses paid). */
-r.get("/", async (req, res) => {
+r.get("/", requireAdminOrUser, async (req, res) => {
   try {
     const [revAgg] = await Order.aggregate([
       { $match: { status: "delivered" } },

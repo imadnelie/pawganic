@@ -1,12 +1,11 @@
 import { Router } from "express";
 import mongoose from "mongoose";
 import { Expense } from "../db.js";
-import { requireAuth, requireAdmin } from "../middleware/auth.js";
+import { requireAuth, requireAdmin, requireAdminOrUser } from "../middleware/auth.js";
 import { isPartner } from "../constants.js";
 
 const r = Router();
 r.use(requireAuth);
-r.use(requireAdmin);
 
 function toExpenseJson(e) {
   return {
@@ -18,7 +17,7 @@ function toExpenseJson(e) {
   };
 }
 
-r.get("/", async (req, res) => {
+r.get("/", requireAdminOrUser, async (req, res) => {
   try {
     const rows = await Expense.find().sort({ date: -1, _id: -1 }).lean();
     res.json(rows.map(toExpenseJson));
@@ -27,7 +26,7 @@ r.get("/", async (req, res) => {
   }
 });
 
-r.post("/", async (req, res) => {
+r.post("/", requireAdminOrUser, async (req, res) => {
   try {
     const { date, description, amount, paidBy } = req.body || {};
     const pBy = String(paidBy || "").toLowerCase();
@@ -49,7 +48,7 @@ r.post("/", async (req, res) => {
   }
 });
 
-r.put("/:id", async (req, res) => {
+r.put("/:id", requireAdmin, async (req, res) => {
   try {
     const id = req.params.id;
     if (!mongoose.isValidObjectId(id)) {
@@ -80,7 +79,7 @@ r.put("/:id", async (req, res) => {
   }
 });
 
-r.delete("/:id", async (req, res) => {
+r.delete("/:id", requireAdmin, async (req, res) => {
   try {
     const id = req.params.id;
     if (!mongoose.isValidObjectId(id)) {

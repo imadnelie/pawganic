@@ -1,7 +1,7 @@
 import { Router } from "express";
 import mongoose from "mongoose";
 import { Order, Customer } from "../db.js";
-import { requireAuth, requireAdmin, requireAdminOrCustomerStaff } from "../middleware/auth.js";
+import { requireAuth, requireAdmin, requireAdminOrUser } from "../middleware/auth.js";
 import { isMealType, isPartner } from "../constants.js";
 
 const r = Router();
@@ -76,7 +76,7 @@ function withItems(docs) {
 
 const populateCustomer = { path: "customerId", select: "first_name last_name" };
 
-r.get("/", requireAdmin, async (req, res) => {
+r.get("/", requireAdminOrUser, async (req, res) => {
   try {
     const { status, createdBy } = req.query;
     const filter = {};
@@ -93,7 +93,7 @@ r.get("/", requireAdmin, async (req, res) => {
   }
 });
 
-r.get("/customer/:customerId", requireAdminOrCustomerStaff, async (req, res) => {
+r.get("/customer/:customerId", requireAdminOrUser, async (req, res) => {
   try {
     const customerId = req.params.customerId;
     if (!mongoose.isValidObjectId(customerId)) {
@@ -109,7 +109,7 @@ r.get("/customer/:customerId", requireAdminOrCustomerStaff, async (req, res) => 
   }
 });
 
-r.post("/", requireAdmin, async (req, res) => {
+r.post("/", requireAdminOrUser, async (req, res) => {
   try {
     const { customerId, items: itemsInput } = req.body || {};
     const parsed = parseItems(itemsInput);

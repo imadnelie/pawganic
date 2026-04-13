@@ -49,13 +49,16 @@ export function requireAdmin(req, res, next) {
 }
 
 /**
- * View/edit customers: admins plus staff with role `user` (e.g. Jimmy).
- * Does not grant access to other admin-only APIs.
+ * Admin or staff (`role` === `user`): shared access for dashboard, customers, orders read/create, etc.
+ * Apply per-route with stricter `requireAdmin` where only admins may mutate.
  */
-export function requireAdminOrCustomerStaff(req, res, next) {
+export function requireAdminOrUser(req, res, next) {
   const role = String(req.user?.role || "");
   if (role === "admin" || role === "user") {
     return next();
   }
   return res.status(403).json({ error: "Forbidden" });
 }
+
+/** @deprecated alias for `requireAdminOrUser` (customer routes use the same gate). */
+export const requireAdminOrCustomerStaff = requireAdminOrUser;

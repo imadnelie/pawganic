@@ -1,7 +1,7 @@
 import { Router } from "express";
 import mongoose from "mongoose";
 import { Customer, Order } from "../db.js";
-import { requireAuth, requireAdmin, requireAdminOrCustomerStaff } from "../middleware/auth.js";
+import { requireAuth, requireAdmin, requireAdminOrUser } from "../middleware/auth.js";
 
 const r = Router();
 r.use(requireAuth);
@@ -22,7 +22,7 @@ function toCustomerRow(c) {
   };
 }
 
-r.get("/", async (req, res) => {
+r.get("/", requireAdminOrUser, async (req, res) => {
   try {
     const rows = await Customer.aggregate([
       {
@@ -43,7 +43,7 @@ r.get("/", async (req, res) => {
   }
 });
 
-r.get("/:id", async (req, res) => {
+r.get("/:id", requireAdminOrUser, async (req, res) => {
   try {
     const id = req.params.id;
     if (!mongoose.isValidObjectId(id)) {
@@ -66,7 +66,7 @@ r.get("/:id", async (req, res) => {
   }
 });
 
-r.post("/", requireAdminOrCustomerStaff, async (req, res) => {
+r.post("/", requireAdminOrUser, async (req, res) => {
   try {
     const { firstName, lastName, mobile, lat, lng } = req.body || {};
     if (!firstName || !lastName || !mobile) {
@@ -97,7 +97,7 @@ r.post("/", requireAdminOrCustomerStaff, async (req, res) => {
   }
 });
 
-r.patch("/:id", requireAdminOrCustomerStaff, async (req, res) => {
+r.patch("/:id", requireAdminOrUser, async (req, res) => {
   try {
     const id = req.params.id;
     if (!mongoose.isValidObjectId(id)) {

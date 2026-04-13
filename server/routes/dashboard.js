@@ -1,17 +1,16 @@
 import { Router } from "express";
 import { Customer, Order, Expense } from "../db.js";
-import { requireAuth, requireAdmin } from "../middleware/auth.js";
+import { requireAuth, requireAdminOrUser } from "../middleware/auth.js";
 
 const r = Router();
 r.use(requireAuth);
-r.use(requireAdmin);
 
 function num(v) {
   const x = Number(v);
   return Number.isFinite(x) ? x : 0;
 }
 
-r.get("/summary", async (req, res) => {
+r.get("/summary", requireAdminOrUser, async (req, res) => {
   try {
     const customers = await Customer.countDocuments();
 
