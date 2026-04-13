@@ -22,13 +22,13 @@ export default function Balance() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-slate-900">Balance</h1>
-      <p className="mt-1 text-sm text-slate-500">
+      <h1 className="hidden text-2xl font-semibold text-slate-900 lg:block">Balance</h1>
+      <p className="mt-0 text-sm leading-relaxed text-slate-500 lg:mt-1">
         Partnership split: 50% of net profit each, adjusted for who collected revenue and who paid
         expenses.
       </p>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:mt-8 lg:grid-cols-3">
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="text-xs font-medium uppercase text-slate-500">Total revenue</div>
           <div className="mt-1 text-2xl font-semibold text-slate-900">{money(b.totalRevenue)}</div>

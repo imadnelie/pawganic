@@ -56,10 +56,12 @@ export default function Dashboard() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-slate-900">Dashboard</h1>
-      <p className="mt-1 text-sm text-slate-500">Overview of your Pawganic operations</p>
+      <h1 className="hidden text-2xl font-semibold text-slate-900 lg:block">Dashboard</h1>
+      <p className="mt-0 text-sm leading-relaxed text-slate-500 lg:mt-1">
+        Overview of your Pawganic operations
+      </p>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:mt-8 lg:grid-cols-4">
         {[
           { label: "Customers", value: data.customers },
           { label: "Pending orders", value: data.ordersPending },

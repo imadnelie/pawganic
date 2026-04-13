@@ -165,21 +165,21 @@ export default function Orders() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Orders</h1>
-          <p className="mt-1 text-sm text-slate-500">Track deliveries and payments</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+        <div className="min-w-0 flex-1">
+          <h1 className="hidden text-2xl font-semibold text-slate-900 lg:block">Orders</h1>
+          <p className="mt-0 text-sm leading-relaxed text-slate-500 lg:mt-1">Track deliveries and payments</p>
         </div>
         <button
           type="button"
           onClick={() => setNewModal(true)}
-          className="rounded-lg bg-forest px-4 py-2 text-sm font-semibold text-white hover:bg-forest/90"
+          className="w-full shrink-0 rounded-lg bg-forest px-4 py-3 text-sm font-semibold text-white hover:bg-forest/90 sm:w-auto sm:py-2"
         >
           New order
         </button>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-3">
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <div>
           <label className="text-xs text-slate-500">Status</label>
           <select

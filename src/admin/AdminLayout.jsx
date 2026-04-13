@@ -172,10 +172,10 @@ export default function AdminLayout() {
           tabIndex={mobileNavOpen ? 0 : -1}
         />
 
-        {/* Sidebar: drawer on &lt;lg, in-flow on lg */}
+        {/* Sidebar: off-canvas below lg; fixed column on lg */}
         <aside
           id="admin-mobile-drawer"
-          className={`fixed left-0 top-14 z-[55] flex w-[min(17.5rem,85vw)] max-w-[280px] flex-col border-r border-slate-200 bg-white shadow-xl transition-transform duration-200 ease-out lg:pointer-events-auto lg:static lg:top-auto lg:z-0 lg:h-auto lg:max-w-none lg:w-56 lg:min-h-screen lg:translate-x-0 lg:shadow-none ${
+          className={`fixed left-0 top-14 z-[55] flex w-[min(17.5rem,85vw)] max-w-[280px] shrink-0 flex-col border-r border-slate-200 bg-white shadow-xl transition-transform duration-200 ease-out lg:pointer-events-auto lg:static lg:top-auto lg:z-0 lg:h-auto lg:max-w-none lg:w-56 lg:min-h-screen lg:translate-x-0 lg:shadow-none ${
             mobileNavOpen
               ? "translate-x-0 pointer-events-auto"
               : "-translate-x-full pointer-events-none"

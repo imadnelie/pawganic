@@ -129,15 +129,17 @@ export default function Expenses() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Expenses</h1>
-          <p className="mt-1 text-sm text-slate-500">Business costs paid by each partner</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+        <div className="min-w-0 flex-1">
+          <h1 className="hidden text-2xl font-semibold text-slate-900 lg:block">Expenses</h1>
+          <p className="mt-0 text-sm leading-relaxed text-slate-500 lg:mt-1">
+            Business costs paid by each partner
+          </p>
         </div>
         <button
           type="button"
           onClick={() => setAddModal(true)}
-          className="rounded-lg bg-forest px-4 py-2 text-sm font-semibold text-white hover:bg-forest/90"
+          className="w-full shrink-0 rounded-lg bg-forest px-4 py-3 text-sm font-semibold text-white hover:bg-forest/90 sm:w-auto sm:py-2"
         >
           Add expense
         </button>
@@ -153,8 +155,8 @@ export default function Expenses() {
         <p className="mt-4 text-sm text-red-600">{err}</p>
       ) : null}
 
-      <div className="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-slate-200 text-sm">
+      <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm [-webkit-overflow-scrolling:touch]">
+        <table className="min-w-[520px] w-full divide-y divide-slate-200 text-sm">
           <thead className="bg-slate-50">
             <tr>
               <th className="px-4 py-3 text-left font-semibold text-slate-700">Date</th>
