@@ -1,4 +1,5 @@
 import "dotenv/config";
+import "express-async-errors";
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -35,6 +36,16 @@ app.use("/api/expenses", expensesRoutes);
 app.use("/api/balance", balanceRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/users", usersRoutes);
+
+app.use((err, req, res, next) => {
+  console.error("[api]", req.method, req.originalUrl, err);
+  if (res.headersSent) {
+    next(err);
+    return;
+  }
+  const status = Number(err.status || err.statusCode) || 500;
+  res.status(status).json({ error: err.message || "Server error" });
+});
 
 const distPath = path.join(__dirname, "..", "dist");
 if (process.env.NODE_ENV === "production") {

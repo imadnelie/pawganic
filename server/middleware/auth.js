@@ -4,7 +4,11 @@ const JWT_SECRET = process.env.JWT_SECRET || "pawganic-dev-secret-change-me";
 
 export function signToken(user) {
   return jwt.sign(
-    { sub: user.id, username: user.username, role: user.role },
+    {
+      sub: user.id,
+      username: String(user?.username || "").toLowerCase().trim(),
+      role: String(user?.role || ""),
+    },
     JWT_SECRET,
     { expiresIn: "7d" }
   );
@@ -12,7 +16,12 @@ export function signToken(user) {
 
 export function signTwoFactorToken(user) {
   return jwt.sign(
-    { sub: user.id, username: user.username, role: user.role, purpose: "2fa" },
+    {
+      sub: user.id,
+      username: String(user?.username || "").toLowerCase().trim(),
+      role: String(user?.role || ""),
+      purpose: "2fa",
+    },
     JWT_SECRET,
     { expiresIn: "10m" }
   );
@@ -25,7 +34,14 @@ export function requireAuth(req, res, next) {
     return res.status(401).json({ error: "Unauthorized" });
   }
   try {
-    req.user = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const sub = decoded?.sub != null ? String(decoded.sub) : "";
+    const username = String(decoded?.username || "").toLowerCase().trim();
+    const role = String(decoded?.role || "");
+    if (!sub) {
+      return res.status(401).json({ error: "Invalid or expired token" });
+    }
+    req.user = { ...decoded, sub, username, role };
     next();
   } catch {
     return res.status(401).json({ error: "Invalid or expired token" });

@@ -121,7 +121,7 @@ r.post("/", requireAdminOrUser, async (req, res) => {
     }
     const cust = await Customer.findById(customerId).select("_id").lean();
     if (!cust) return res.status(400).json({ error: "Customer not found" });
-    const username = req.user.username.toLowerCase();
+    const username = String(req.user?.username || "").toLowerCase().trim();
     if (!isPartner(username)) {
       return res.status(400).json({ error: "Invalid session user for created_by" });
     }

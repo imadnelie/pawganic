@@ -68,6 +68,10 @@ export async function api(path, options = {}) {
       msg =
         "Expense request failed (404). Restart the API server so the latest routes load, then try again.";
     }
+    if (!msg && res.status >= 500 && typeof data?.raw === "string" && data.raw.includes("<!DOCTYPE")) {
+      msg =
+        "Server error (non-JSON response). Check the API terminal for [api] logs—often MongoDB connection, schema mismatch, or an unhandled exception.";
+    }
     msg =
       msg ||
       res.statusText ||

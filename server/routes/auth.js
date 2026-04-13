@@ -40,12 +40,15 @@ const forgotLimiter = rateLimit({
 r.use(authLimiter);
 
 function userPayload(userDoc) {
+  if (!userDoc?._id) {
+    throw new Error("Invalid user record");
+  }
   return {
     id: String(userDoc._id),
-    username: userDoc.username,
-    email: userDoc.email,
-    role: userDoc.role,
-    displayName: userDoc.display_name,
+    username: String(userDoc.username || ""),
+    email: String(userDoc.email ?? ""),
+    role: String(userDoc.role || ""),
+    displayName: String(userDoc.display_name ?? ""),
   };
 }
 
@@ -134,6 +137,7 @@ r.get("/me", requireAuth, async (req, res) => {
       twoFactorEnabled: Boolean(user.two_factor_enabled),
     });
   } catch (e) {
+    console.error("[auth] /me:", e);
     res.status(500).json({ error: e.message || "Server error" });
   }
 });
