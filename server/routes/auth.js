@@ -2,7 +2,7 @@ import { Router } from "express";
 import bcrypt from "bcryptjs";
 import speakeasy from "speakeasy";
 import QRCode from "qrcode";
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import mongoose from "mongoose";
 import { User } from "../db.js";
 import { signToken, signTwoFactorToken, requireAuth, verifyTwoFactorToken } from "../middleware/auth.js";
@@ -12,11 +12,21 @@ import { sendResetPasswordEmail } from "../lib/mailer.js";
 
 const r = Router();
 
+/** Stable client key when `req.ip` is missing (some proxies / Node versions). */
+function rateLimitKey(request) {
+  const raw =
+    request.ip ||
+    request.socket?.remoteAddress?.replace(/^::ffff:/, "") ||
+    "127.0.0.1";
+  return ipKeyGenerator(raw, 56);
+}
+
 const authLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 15,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: rateLimitKey,
 });
 
 const forgotLimiter = rateLimit({
@@ -24,6 +34,7 @@ const forgotLimiter = rateLimit({
   max: 8,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: rateLimitKey,
 });
 
 r.use(authLimiter);
@@ -38,6 +49,15 @@ function userPayload(userDoc) {
   };
 }
 
+function passwordMatches(storedHash, plainPassword) {
+  if (typeof storedHash !== "string" || !storedHash) return false;
+  try {
+    return bcrypt.compareSync(plainPassword, storedHash);
+  } catch {
+    return false;
+  }
+}
+
 r.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body || {};
@@ -47,7 +67,7 @@ r.post("/login", async (req, res) => {
     const user = await User.findOne({
       username: String(username).toLowerCase().trim(),
     }).lean();
-    if (!user || !bcrypt.compareSync(password, user.password_hash)) {
+    if (!user || !passwordMatches(user.password_hash, password)) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
     if (user.two_factor_enabled && user.two_factor_secret) {
@@ -60,6 +80,7 @@ r.post("/login", async (req, res) => {
       user: userPayload(user),
     });
   } catch (e) {
+    console.error("[auth] login:", e);
     res.status(500).json({ error: e.message || "Server error" });
   }
 });

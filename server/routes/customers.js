@@ -1,7 +1,7 @@
 import { Router } from "express";
 import mongoose from "mongoose";
 import { Customer, Order } from "../db.js";
-import { requireAuth, requireSuperAdmin } from "../middleware/auth.js";
+import { requireAuth, requireAdmin, requireAdminOrCustomerStaff } from "../middleware/auth.js";
 
 const r = Router();
 r.use(requireAuth);
@@ -66,7 +66,7 @@ r.get("/:id", async (req, res) => {
   }
 });
 
-r.post("/", async (req, res) => {
+r.post("/", requireAdminOrCustomerStaff, async (req, res) => {
   try {
     const { firstName, lastName, mobile, lat, lng } = req.body || {};
     if (!firstName || !lastName || !mobile) {
@@ -97,7 +97,7 @@ r.post("/", async (req, res) => {
   }
 });
 
-r.patch("/:id", requireSuperAdmin, async (req, res) => {
+r.patch("/:id", requireAdminOrCustomerStaff, async (req, res) => {
   try {
     const id = req.params.id;
     if (!mongoose.isValidObjectId(id)) {
@@ -140,7 +140,7 @@ r.patch("/:id", requireSuperAdmin, async (req, res) => {
   }
 });
 
-r.delete("/:id", requireSuperAdmin, async (req, res) => {
+r.delete("/:id", requireAdmin, async (req, res) => {
   try {
     const id = req.params.id;
     if (!mongoose.isValidObjectId(id)) {

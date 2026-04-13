@@ -19,8 +19,7 @@ function emptyAddForm() {
 
 export default function Expenses() {
   const { user } = useAuth();
-  const canEditExpenses =
-    String(user?.username || "").toLowerCase() === "elie" && user?.role === "admin";
+  const canEditExpenses = user?.role === "admin";
 
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);

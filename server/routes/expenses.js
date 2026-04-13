@@ -1,11 +1,12 @@
 import { Router } from "express";
 import mongoose from "mongoose";
 import { Expense } from "../db.js";
-import { requireAuth, requireSuperAdmin } from "../middleware/auth.js";
+import { requireAuth, requireAdmin } from "../middleware/auth.js";
 import { isPartner } from "../constants.js";
 
 const r = Router();
 r.use(requireAuth);
+r.use(requireAdmin);
 
 function toExpenseJson(e) {
   return {
@@ -48,7 +49,7 @@ r.post("/", async (req, res) => {
   }
 });
 
-r.put("/:id", requireSuperAdmin, async (req, res) => {
+r.put("/:id", async (req, res) => {
   try {
     const id = req.params.id;
     if (!mongoose.isValidObjectId(id)) {
@@ -79,7 +80,7 @@ r.put("/:id", requireSuperAdmin, async (req, res) => {
   }
 });
 
-r.delete("/:id", requireSuperAdmin, async (req, res) => {
+r.delete("/:id", async (req, res) => {
   try {
     const id = req.params.id;
     if (!mongoose.isValidObjectId(id)) {

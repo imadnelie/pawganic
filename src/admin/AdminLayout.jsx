@@ -1,19 +1,21 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import { isAdmin } from "../lib/authz.js";
 
 export default function AdminLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const isSuperAdmin =
-    String(user?.username || "").toLowerCase() === "elie" && user?.role === "admin";
-  const nav = [
-    { to: "/admin", label: "Dashboard", end: true },
-    { to: "/admin/customers", label: "Customers" },
-    { to: "/admin/orders", label: "Orders" },
-    { to: "/admin/expenses", label: "Expenses" },
-    { to: "/admin/balance", label: "Balance" },
-    ...(isSuperAdmin ? [{ to: "/admin/users", label: "Users" }] : []),
-  ];
+  const admin = isAdmin(user);
+  const nav = admin
+    ? [
+        { to: "/admin", label: "Dashboard", end: true },
+        { to: "/admin/customers", label: "Customers" },
+        { to: "/admin/orders", label: "Orders" },
+        { to: "/admin/expenses", label: "Expenses" },
+        { to: "/admin/balance", label: "Balance" },
+        { to: "/admin/users", label: "Users" },
+      ]
+    : [{ to: "/admin/customers", label: "Customers" }];
 
   return (
     <div className="flex min-h-screen bg-slate-50">

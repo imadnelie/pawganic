@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../../api.js";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { canManageCustomers } from "../../lib/authz.js";
 import StatusBadge from "../components/StatusBadge.jsx";
 import { mealLabel } from "../../lib/constants.js";
 
@@ -12,8 +13,7 @@ function money(n) {
 export default function CustomerDetail() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const isSuperAdmin =
-    String(user?.username || "").toLowerCase() === "elie" && user?.role === "admin";
+  const canEdit = canManageCustomers(user);
   const { id } = useParams();
   const [customer, setCustomer] = useState(null);
   const [orders, setOrders] = useState([]);
@@ -107,7 +107,7 @@ export default function CustomerDetail() {
       <div className="mt-8 grid gap-8 lg:grid-cols-2">
         <div>
           <h2 className="text-sm font-semibold text-slate-900">
-            {isSuperAdmin ? "Edit customer" : "Customer details"}
+            {canEdit ? "Edit customer" : "Customer details"}
           </h2>
           {err ? <p className="mt-2 text-sm text-red-600">{err}</p> : null}
           <form onSubmit={saveCustomer} className="mt-3 space-y-3">
@@ -116,7 +116,7 @@ export default function CustomerDetail() {
                 <label className="text-xs font-medium text-slate-600">First name</label>
                 <input
                   required
-                  disabled={!isSuperAdmin}
+                  disabled={!canEdit}
                   className="mt-1 block w-full rounded-lg border-slate-300 text-sm"
                   value={form.firstName}
                   onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
@@ -126,7 +126,7 @@ export default function CustomerDetail() {
                 <label className="text-xs font-medium text-slate-600">Last name</label>
                 <input
                   required
-                  disabled={!isSuperAdmin}
+                  disabled={!canEdit}
                   className="mt-1 block w-full rounded-lg border-slate-300 text-sm"
                   value={form.lastName}
                   onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
@@ -137,7 +137,7 @@ export default function CustomerDetail() {
               <label className="text-xs font-medium text-slate-600">Mobile</label>
               <input
                 required
-                disabled={!isSuperAdmin}
+                disabled={!canEdit}
                 className="mt-1 block w-full rounded-lg border-slate-300 text-sm"
                 value={form.mobile}
                 onChange={(e) => setForm((f) => ({ ...f, mobile: e.target.value }))}
@@ -147,7 +147,7 @@ export default function CustomerDetail() {
               <div>
                 <label className="text-xs font-medium text-slate-600">Latitude</label>
                 <input
-                  disabled={!isSuperAdmin}
+                  disabled={!canEdit}
                   className="mt-1 block w-full rounded-lg border-slate-300 text-sm"
                   value={form.lat}
                   onChange={(e) => setForm((f) => ({ ...f, lat: e.target.value }))}
@@ -156,14 +156,14 @@ export default function CustomerDetail() {
               <div>
                 <label className="text-xs font-medium text-slate-600">Longitude</label>
                 <input
-                  disabled={!isSuperAdmin}
+                  disabled={!canEdit}
                   className="mt-1 block w-full rounded-lg border-slate-300 text-sm"
                   value={form.lng}
                   onChange={(e) => setForm((f) => ({ ...f, lng: e.target.value }))}
                 />
               </div>
             </div>
-            {isSuperAdmin ? (
+            {canEdit ? (
               <button
                 type="submit"
                 className="rounded-lg bg-forest px-4 py-2 text-sm font-semibold text-white hover:bg-forest/90"

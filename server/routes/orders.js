@@ -1,7 +1,7 @@
 import { Router } from "express";
 import mongoose from "mongoose";
 import { Order, Customer } from "../db.js";
-import { requireAuth, requireSuperAdmin } from "../middleware/auth.js";
+import { requireAuth, requireAdmin, requireAdminOrCustomerStaff } from "../middleware/auth.js";
 import { isMealType, isPartner } from "../constants.js";
 
 const r = Router();
@@ -76,7 +76,7 @@ function withItems(docs) {
 
 const populateCustomer = { path: "customerId", select: "first_name last_name" };
 
-r.get("/", async (req, res) => {
+r.get("/", requireAdmin, async (req, res) => {
   try {
     const { status, createdBy } = req.query;
     const filter = {};
@@ -93,7 +93,7 @@ r.get("/", async (req, res) => {
   }
 });
 
-r.get("/customer/:customerId", async (req, res) => {
+r.get("/customer/:customerId", requireAdminOrCustomerStaff, async (req, res) => {
   try {
     const customerId = req.params.customerId;
     if (!mongoose.isValidObjectId(customerId)) {
@@ -109,7 +109,7 @@ r.get("/customer/:customerId", async (req, res) => {
   }
 });
 
-r.post("/", async (req, res) => {
+r.post("/", requireAdmin, async (req, res) => {
   try {
     const { customerId, items: itemsInput } = req.body || {};
     const parsed = parseItems(itemsInput);
@@ -148,7 +148,7 @@ r.post("/", async (req, res) => {
   }
 });
 
-r.post("/:id/deliver", async (req, res) => {
+r.post("/:id/deliver", requireAdmin, async (req, res) => {
   try {
     const id = req.params.id;
     if (!mongoose.isValidObjectId(id)) {
@@ -182,7 +182,7 @@ r.post("/:id/deliver", async (req, res) => {
   }
 });
 
-r.put("/:id", requireSuperAdmin, async (req, res) => {
+r.put("/:id", requireAdmin, async (req, res) => {
   try {
     const id = req.params.id;
     if (!mongoose.isValidObjectId(id)) {
@@ -241,7 +241,7 @@ r.put("/:id", requireSuperAdmin, async (req, res) => {
   }
 });
 
-r.delete("/:id", requireSuperAdmin, async (req, res) => {
+r.delete("/:id", requireAdmin, async (req, res) => {
   try {
     const id = req.params.id;
     if (!mongoose.isValidObjectId(id)) {

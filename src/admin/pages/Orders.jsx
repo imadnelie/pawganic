@@ -11,8 +11,7 @@ function money(n) {
 
 export default function Orders() {
   const { user } = useAuth();
-  const isSuperAdmin =
-    String(user?.username || "").toLowerCase() === "elie" && user?.role === "admin";
+  const isAdminUser = user?.role === "admin";
   const [orders, setOrders] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -280,7 +279,7 @@ export default function Orders() {
                           Mark delivered
                         </button>
                       ) : null}
-                      {isSuperAdmin ? (
+                      {isAdminUser ? (
                         <button
                           type="button"
                           onClick={() => openEdit(o)}
@@ -289,7 +288,7 @@ export default function Orders() {
                           Edit
                         </button>
                       ) : null}
-                      {isSuperAdmin ? (
+                      {isAdminUser ? (
                         <button
                           type="button"
                           onClick={() => setDeleteOrder(o)}

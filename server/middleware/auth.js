@@ -40,12 +40,22 @@ export function verifyTwoFactorToken(token) {
   return decoded;
 }
 
-/** Super admin (elie) only — backend must enforce; do not rely on the UI alone. */
-export function requireSuperAdmin(req, res, next) {
-  const u = String(req.user?.username || "").toLowerCase();
-  const role = String(req.user?.role || "");
-  if (u === "elie" && role === "admin") {
+/** Any account with role `admin` (backend must enforce; do not rely on the UI alone). */
+export function requireAdmin(req, res, next) {
+  if (String(req.user?.role || "") === "admin") {
     return next();
   }
-  return res.status(403).json({ error: "Forbidden: only the super admin can perform this action" });
+  return res.status(403).json({ error: "Forbidden: admin access required" });
+}
+
+/**
+ * View/edit customers: admins plus staff with role `user` (e.g. Jimmy).
+ * Does not grant access to other admin-only APIs.
+ */
+export function requireAdminOrCustomerStaff(req, res, next) {
+  const role = String(req.user?.role || "");
+  if (role === "admin" || role === "user") {
+    return next();
+  }
+  return res.status(403).json({ error: "Forbidden" });
 }

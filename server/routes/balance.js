@@ -1,9 +1,10 @@
 import { Router } from "express";
 import { Order, Expense } from "../db.js";
-import { requireAuth } from "../middleware/auth.js";
+import { requireAuth, requireAdmin } from "../middleware/auth.js";
 
 const r = Router();
 r.use(requireAuth);
+r.use(requireAdmin);
 
 function num(v) {
   const x = Number(v);

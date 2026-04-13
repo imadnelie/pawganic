@@ -32,12 +32,40 @@ export default function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<Dashboard />} />
+            <Route
+              index
+              element={
+                <AdminOnlyRoute>
+                  <Dashboard />
+                </AdminOnlyRoute>
+              }
+            />
             <Route path="customers" element={<Customers />} />
             <Route path="customers/:id" element={<CustomerDetail />} />
-            <Route path="orders" element={<Orders />} />
-            <Route path="expenses" element={<Expenses />} />
-            <Route path="balance" element={<Balance />} />
+            <Route
+              path="orders"
+              element={
+                <AdminOnlyRoute>
+                  <Orders />
+                </AdminOnlyRoute>
+              }
+            />
+            <Route
+              path="expenses"
+              element={
+                <AdminOnlyRoute>
+                  <Expenses />
+                </AdminOnlyRoute>
+              }
+            />
+            <Route
+              path="balance"
+              element={
+                <AdminOnlyRoute>
+                  <Balance />
+                </AdminOnlyRoute>
+              }
+            />
             <Route
               path="users"
               element={

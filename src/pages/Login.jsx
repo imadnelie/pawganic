@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Navigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import { postLoginDestination } from "../lib/authz.js";
 
 export default function Login() {
   const { user, login, verifyTwoFactor, loading } = useAuth();
   const location = useLocation();
-  const from = location.state?.from?.pathname || "/admin";
+  const fromPath = location.state?.from?.pathname;
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -24,7 +25,7 @@ export default function Login() {
   }
 
   if (user) {
-    return <Navigate to={from} replace />;
+    return <Navigate to={postLoginDestination(user, fromPath)} replace />;
   }
 
   const onSubmit = async (e) => {

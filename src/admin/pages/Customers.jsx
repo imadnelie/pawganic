@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../../api.js";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { canManageCustomers, isAdmin } from "../../lib/authz.js";
 import Modal from "../components/Modal.jsx";
 
 export default function Customers() {
   const { user } = useAuth();
-  const isSuperAdmin =
-    String(user?.username || "").toLowerCase() === "elie" && user?.role === "admin";
+  const canEdit = canManageCustomers(user);
+  const canDelete = isAdmin(user);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(false);
@@ -90,13 +91,15 @@ export default function Customers() {
           <h1 className="text-2xl font-semibold text-slate-900">Customers</h1>
           <p className="mt-1 text-sm text-slate-500">Manage customer profiles and locations</p>
         </div>
-        <button
-          type="button"
-          onClick={() => setModal(true)}
-          className="rounded-lg bg-forest px-4 py-2 text-sm font-semibold text-white hover:bg-forest/90"
-        >
-          Add customer
-        </button>
+        {canEdit ? (
+          <button
+            type="button"
+            onClick={() => setModal(true)}
+            className="rounded-lg bg-forest px-4 py-2 text-sm font-semibold text-white hover:bg-forest/90"
+          >
+            Add customer
+          </button>
+        ) : null}
       </div>
 
       {err && !modal ? <p className="mt-4 text-sm text-red-600">{err}</p> : null}
@@ -156,7 +159,7 @@ export default function Customers() {
                       >
                         View
                       </Link>
-                      {isSuperAdmin ? (
+                      {canDelete ? (
                         <button
                           type="button"
                           onClick={() => deleteCustomer(c)}

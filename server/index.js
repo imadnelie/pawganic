@@ -16,6 +16,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = Number(process.env.PORT) || 3001;
 
+// Needed so express-rate-limit accepts proxied requests (e.g. Vite dev server → API)
+// that send X-Forwarded-For. Use 1 hop, not `true`, to satisfy rate-limit validation.
+app.set("trust proxy", Number(process.env.TRUST_PROXY_HOPS) || 1);
+
 app.use(
   cors({
     origin: true,

@@ -4,12 +4,12 @@ import speakeasy from "speakeasy";
 import QRCode from "qrcode";
 import mongoose from "mongoose";
 import { User } from "../db.js";
-import { requireAuth, requireSuperAdmin } from "../middleware/auth.js";
+import { requireAuth, requireAdmin } from "../middleware/auth.js";
 import { encryptText, decryptText } from "../lib/crypto.js";
 
 const r = Router();
 r.use(requireAuth);
-r.use(requireSuperAdmin);
+r.use(requireAdmin);
 
 r.get("/", async (req, res) => {
   try {
