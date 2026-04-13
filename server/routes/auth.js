@@ -121,6 +121,7 @@ r.post("/verify-2fa", async (req, res) => {
       user: userPayload(user),
     });
   } catch (e) {
+    console.error("[auth] verify-2fa:", e);
     res.status(500).json({ error: e.message || "Server error" });
   }
 });
