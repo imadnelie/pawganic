@@ -3,6 +3,14 @@ import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { isAdmin } from "../lib/authz.js";
 
+const STAFF_NAV = [
+  { to: "/admin", label: "Dashboard", end: true },
+  { to: "/admin/customers", label: "Customers" },
+  { to: "/admin/orders", label: "Orders" },
+  { to: "/admin/expenses", label: "Expenses" },
+  { to: "/admin/balance", label: "Balance" },
+];
+
 function defaultTitleForPath(pathname) {
   if (pathname === "/admin") return "Dashboard";
   if (pathname === "/admin/customers") return "Customers";
@@ -41,16 +49,7 @@ export default function AdminLayout() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [pageTitleOverride, setPageTitleOverride] = useState(null);
 
-  const nav = admin
-    ? [
-        { to: "/admin", label: "Dashboard", end: true },
-        { to: "/admin/customers", label: "Customers" },
-        { to: "/admin/orders", label: "Orders" },
-        { to: "/admin/expenses", label: "Expenses" },
-        { to: "/admin/balance", label: "Balance" },
-        { to: "/admin/users", label: "Users" },
-      ]
-    : [{ to: "/admin/customers", label: "Customers" }];
+  const nav = admin ? [...STAFF_NAV, { to: "/admin/users", label: "Users" }] : STAFF_NAV;
 
   const closeMobileNav = useCallback(() => setMobileNavOpen(false), []);
 

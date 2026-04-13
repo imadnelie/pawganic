@@ -7,6 +7,7 @@ import ResetPassword from "./pages/ResetPassword.jsx";
 import AdminLayout from "./admin/AdminLayout.jsx";
 import ProtectedRoute from "./admin/ProtectedRoute.jsx";
 import AdminOnlyRoute from "./admin/AdminOnlyRoute.jsx";
+import AdminOrStaffRoute from "./admin/AdminOrStaffRoute.jsx";
 import Dashboard from "./admin/pages/Dashboard.jsx";
 import Customers from "./admin/pages/Customers.jsx";
 import CustomerDetail from "./admin/pages/CustomerDetail.jsx";
@@ -35,9 +36,9 @@ export default function App() {
             <Route
               index
               element={
-                <AdminOnlyRoute>
+                <AdminOrStaffRoute>
                   <Dashboard />
-                </AdminOnlyRoute>
+                </AdminOrStaffRoute>
               }
             />
             <Route path="customers" element={<Customers />} />
@@ -45,25 +46,25 @@ export default function App() {
             <Route
               path="orders"
               element={
-                <AdminOnlyRoute>
+                <AdminOrStaffRoute>
                   <Orders />
-                </AdminOnlyRoute>
+                </AdminOrStaffRoute>
               }
             />
             <Route
               path="expenses"
               element={
-                <AdminOnlyRoute>
+                <AdminOrStaffRoute>
                   <Expenses />
-                </AdminOnlyRoute>
+                </AdminOrStaffRoute>
               }
             />
             <Route
               path="balance"
               element={
-                <AdminOnlyRoute>
+                <AdminOrStaffRoute>
                   <Balance />
-                </AdminOnlyRoute>
+                </AdminOrStaffRoute>
               }
             />
             <Route

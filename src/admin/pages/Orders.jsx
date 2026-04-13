@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../../api.js";
 import { MEAL_TYPES, PARTNERS, mealLabel } from "../../lib/constants.js";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { isAdmin } from "../../lib/authz.js";
 import Modal from "../components/Modal.jsx";
 import StatusBadge from "../components/StatusBadge.jsx";
 
@@ -11,7 +12,7 @@ function money(n) {
 
 export default function Orders() {
   const { user } = useAuth();
-  const isAdminUser = user?.role === "admin";
+  const canAdminOrders = isAdmin(user);
   const [orders, setOrders] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -264,7 +265,7 @@ export default function Orders() {
                   </td>
                   <td className="px-3 py-3 text-right">
                     <div className="flex justify-end gap-3">
-                      {o.status === "pending" ? (
+                      {o.status === "pending" && canAdminOrders ? (
                         <button
                           type="button"
                           onClick={() => {
@@ -279,7 +280,7 @@ export default function Orders() {
                           Mark delivered
                         </button>
                       ) : null}
-                      {isAdminUser ? (
+                      {canAdminOrders ? (
                         <button
                           type="button"
                           onClick={() => openEdit(o)}
@@ -288,7 +289,7 @@ export default function Orders() {
                           Edit
                         </button>
                       ) : null}
-                      {isAdminUser ? (
+                      {canAdminOrders ? (
                         <button
                           type="button"
                           onClick={() => setDeleteOrder(o)}

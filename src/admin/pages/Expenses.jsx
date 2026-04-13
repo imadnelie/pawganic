@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../../api.js";
 import { PARTNERS } from "../../lib/constants.js";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { canEditExpense } from "../../lib/authz.js";
 import Modal from "../components/Modal.jsx";
 
 function money(n) {
@@ -19,7 +20,7 @@ function emptyAddForm() {
 
 export default function Expenses() {
   const { user } = useAuth();
-  const canEditExpenses = user?.role === "admin";
+  const showExpenseRowActions = canEditExpense(user);
 
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -163,7 +164,7 @@ export default function Expenses() {
               <th className="px-4 py-3 text-left font-semibold text-slate-700">Description</th>
               <th className="px-4 py-3 text-left font-semibold text-slate-700">Amount</th>
               <th className="px-4 py-3 text-left font-semibold text-slate-700">Paid by</th>
-              {canEditExpenses ? (
+              {showExpenseRowActions ? (
                 <th className="px-4 py-3 text-right font-semibold text-slate-700">Actions</th>
               ) : null}
             </tr>
@@ -172,7 +173,7 @@ export default function Expenses() {
             {loading ? (
               <tr>
                 <td
-                  colSpan={canEditExpenses ? 5 : 4}
+                  colSpan={showExpenseRowActions ? 5 : 4}
                   className="px-4 py-8 text-center text-slate-500"
                 >
                   Loading…
@@ -181,7 +182,7 @@ export default function Expenses() {
             ) : rows.length === 0 ? (
               <tr>
                 <td
-                  colSpan={canEditExpenses ? 5 : 4}
+                  colSpan={showExpenseRowActions ? 5 : 4}
                   className="px-4 py-8 text-center text-slate-500"
                 >
                   No expenses recorded.
@@ -194,7 +195,7 @@ export default function Expenses() {
                   <td className="px-4 py-3 font-medium text-slate-900">{e.description}</td>
                   <td className="px-4 py-3 text-slate-600">{money(e.amount)}</td>
                   <td className="px-4 py-3 capitalize text-slate-600">{e.paidBy}</td>
-                  {canEditExpenses ? (
+                  {showExpenseRowActions ? (
                     <td className="px-4 py-3 text-right">
                       <div className="flex flex-wrap items-center justify-end gap-3">
                         <button
