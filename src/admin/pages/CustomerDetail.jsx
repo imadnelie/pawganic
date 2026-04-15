@@ -5,6 +5,8 @@ import { useAuth } from "../../context/AuthContext.jsx";
 import { canManageCustomers } from "../../lib/authz.js";
 import StatusBadge from "../components/StatusBadge.jsx";
 import { mealLabel } from "../../lib/constants.js";
+import OrderShareModal from "../components/OrderShareModal.jsx";
+import { normalizeShareOrder } from "../utils/orderShare.js";
 
 function money(n) {
   return new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(n);
@@ -20,6 +22,7 @@ export default function CustomerDetail() {
   const [orders, setOrders] = useState([]);
   const [form, setForm] = useState(null);
   const [err, setErr] = useState("");
+  const [shareModal, setShareModal] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -196,12 +199,13 @@ export default function CustomerDetail() {
                   <th className="px-3 py-2 text-left font-semibold text-slate-700">Status</th>
                   <th className="px-3 py-2 text-left font-semibold text-slate-700">Paid to</th>
                   <th className="px-3 py-2 text-left font-semibold text-slate-700">Dates</th>
+                  <th className="px-3 py-2 text-left font-semibold text-slate-700" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {orders.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-3 py-6 text-center text-slate-500">
+                    <td colSpan={6} className="px-3 py-6 text-center text-slate-500">
                       No orders yet.
                     </td>
                   </tr>
@@ -236,6 +240,15 @@ export default function CustomerDetail() {
                           </div>
                         ) : null}
                       </td>
+                      <td className="px-3 py-2 text-right">
+                        <button
+                          type="button"
+                          onClick={() => setShareModal(normalizeShareOrder(o))}
+                          className="text-xs font-semibold text-emerald-700 hover:underline"
+                        >
+                          Share
+                        </button>
+                      </td>
                     </tr>
                   ))
                 )}
@@ -244,6 +257,7 @@ export default function CustomerDetail() {
           </div>
         </div>
       </div>
+      <OrderShareModal open={!!shareModal} order={shareModal} onClose={() => setShareModal(null)} />
     </div>
   );
 }

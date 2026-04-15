@@ -4,7 +4,9 @@ import { MEAL_TYPES, PARTNERS, mealLabel } from "../../lib/constants.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { isAdmin } from "../../lib/authz.js";
 import Modal from "../components/Modal.jsx";
+import OrderShareModal from "../components/OrderShareModal.jsx";
 import StatusBadge from "../components/StatusBadge.jsx";
+import { normalizeShareOrder } from "../utils/orderShare.js";
 
 function money(n) {
   return new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(n);
@@ -34,6 +36,7 @@ export default function Orders() {
   });
   const [editModal, setEditModal] = useState(null);
   const [deleteOrder, setDeleteOrder] = useState(null);
+  const [shareModal, setShareModal] = useState(null);
   const [editForm, setEditForm] = useState({
     customerId: "",
     items: [{ mealType: "chicken_with_rice", quantity: 1, pricePerUnit: "" }],
@@ -52,7 +55,10 @@ export default function Orders() {
     if (filterStatus) q.set("status", filterStatus);
     if (filterCreator) q.set("createdBy", filterCreator);
     const suffix = q.toString() ? `?${q}` : "";
-    return api(`/orders${suffix}`).then(setOrders);
+    return api(`/orders${suffix}`).then((data) => {
+      setOrders(data);
+      return data;
+    });
   };
 
   useEffect(() => {
@@ -66,7 +72,7 @@ export default function Orders() {
     e.preventDefault();
     setErr("");
     try {
-      await api("/orders", {
+      const created = await api("/orders", {
         method: "POST",
         body: {
           customerId: newForm.customerId,
@@ -84,7 +90,9 @@ export default function Orders() {
         items: [{ mealType: "chicken_with_rice", quantity: 1, pricePerUnit: "" }],
         deliveryAmount: 0,
       });
-      await loadOrders();
+      const refreshedOrders = await loadOrders();
+      const freshestCreated = refreshedOrders.find((o) => o.id === created.id) || created;
+      setShareModal(normalizeShareOrder(freshestCreated));
     } catch (ex) {
       setErr(ex.message);
     }
@@ -276,6 +284,13 @@ export default function Orders() {
                   </td>
                   <td className="px-3 py-3 text-right">
                     <div className="flex justify-end gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setShareModal(normalizeShareOrder(o))}
+                        className="text-xs font-semibold text-emerald-700 hover:underline"
+                      >
+                        Share
+                      </button>
                       {o.status === "pending" && canAdminOrders ? (
                         <button
                           type="button"
@@ -455,6 +470,7 @@ export default function Orders() {
           </div>
         </form>
       </Modal>
+      <OrderShareModal open={!!shareModal} order={shareModal} onClose={() => setShareModal(null)} />
 
       <Modal
         open={!!deliverModal}
