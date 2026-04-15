@@ -92,7 +92,7 @@ export default function Orders() {
       });
       const refreshedOrders = await loadOrders();
       const freshestCreated = refreshedOrders.find((o) => o.id === created.id) || created;
-      setShareModal(normalizeShareOrder(freshestCreated));
+      setShareModal(enrichOrderForShare(freshestCreated));
     } catch (ex) {
       setErr(ex.message);
     }
@@ -101,6 +101,14 @@ export default function Orders() {
   const sortedCustomers = [...customers].sort((a, b) =>
     `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`)
   );
+
+  const enrichOrderForShare = (order) => {
+    const match = customers.find((c) => String(c.id) === String(order?.customerId));
+    return normalizeShareOrder({
+      ...order,
+      customerMobile: order?.customerMobile || match?.mobile || "",
+    });
+  };
 
   const submitDeliver = async (e) => {
     e.preventDefault();
@@ -286,7 +294,7 @@ export default function Orders() {
                     <div className="flex justify-end gap-3">
                       <button
                         type="button"
-                        onClick={() => setShareModal(normalizeShareOrder(o))}
+                        onClick={() => setShareModal(enrichOrderForShare(o))}
                         className="text-xs font-semibold text-emerald-700 hover:underline"
                       >
                         Share

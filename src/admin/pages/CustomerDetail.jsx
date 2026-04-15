@@ -243,7 +243,14 @@ export default function CustomerDetail() {
                       <td className="px-3 py-2 text-right">
                         <button
                           type="button"
-                          onClick={() => setShareModal(normalizeShareOrder(o))}
+                          onClick={() =>
+                            setShareModal(
+                              normalizeShareOrder({
+                                ...o,
+                                customerMobile: o.customerMobile || customer.mobile || "",
+                              })
+                            )
+                          }
                           className="text-xs font-semibold text-emerald-700 hover:underline"
                         >
                           Share
