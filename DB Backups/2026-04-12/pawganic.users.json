@@ -1,0 +1,32 @@
+[{
+  "_id": {
+    "$oid": "69dab2135840ecabd1b4729d"
+  },
+  "username": "elie",
+  "email": "elie.imad@gmail.com",
+  "password_hash": "$2a$10$gHWnp8zXD9mbIjdohxZsy.I7HaHskvfjEQv/pR9TlM/xjXnNl7zBq",
+  "role": "admin",
+  "display_name": "Elie",
+  "two_factor_enabled": true,
+  "two_factor_secret": "LF0OOU7gMbHgRe0HLDN2QXV4oSWSRZkIpl3mcIHly+huJwZmmw1IibBUK7GYD1rbbVHNu9yUudL2Z3sI",
+  "two_factor_temp_secret": null,
+  "reset_token": null,
+  "reset_token_expiry": null,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69dab2135840ecabd1b4729e"
+  },
+  "username": "jimmy",
+  "email": "jimmymakdissy@gmail.com",
+  "password_hash": "$2a$10$jZ6KlGjbf/pmY7J4nPDt7.88sW5aV/PSYu6uzNuqKPj789LkBD..u",
+  "role": "user",
+  "display_name": "Jimmy",
+  "two_factor_enabled": true,
+  "two_factor_secret": "ZbqyxYyZX//080qYOzkVGEVEuwmtlI1CHGZbxQ3oW5M9eY8nf3AxecOyCBJ+rwXfDoU6k0H+XrV+BJ6F",
+  "two_factor_temp_secret": null,
+  "reset_token": null,
+  "reset_token_expiry": null,
+  "__v": 0
+}]

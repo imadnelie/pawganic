@@ -16,6 +16,7 @@ function docToOrder(doc) {
     customerId: String(cid),
     customerFirstName: c?.first_name ?? "",
     customerLastName: c?.last_name ?? "",
+    customerMobile: c?.mobile ?? "",
     mealType: doc.mealType,
     quantity: doc.quantity,
     businessSubtotal: Number(doc.businessSubtotal ?? doc.totalPrice ?? 0),
@@ -86,7 +87,7 @@ function withItems(docs) {
   });
 }
 
-const populateCustomer = { path: "customerId", select: "first_name last_name" };
+const populateCustomer = { path: "customerId", select: "first_name last_name mobile" };
 
 r.get("/", requireAdminOrUser, async (req, res) => {
   try {

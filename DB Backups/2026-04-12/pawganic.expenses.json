@@ -1,0 +1,570 @@
+[{
+  "_id": {
+    "$oid": "69db953ba7a5c68bc6a37f2b"
+  },
+  "date": "2025-01-01",
+  "description": "Table",
+  "amount": 30,
+  "paid_by": "elie",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9573a7a5c68bc6a37f35"
+  },
+  "date": "2025-01-01",
+  "description": "Kitchen Equipment",
+  "amount": 20,
+  "paid_by": "elie",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9587a7a5c68bc6a37f38"
+  },
+  "date": "2025-01-01",
+  "description": "Vacuum Bags",
+  "amount": 18,
+  "paid_by": "elie",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9593a7a5c68bc6a37f3b"
+  },
+  "date": "2025-01-01",
+  "description": "Banana Bags",
+  "amount": 30,
+  "paid_by": "elie",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db95a1a7a5c68bc6a37f3e"
+  },
+  "date": "2025-01-01",
+  "description": "Mobile SIM",
+  "amount": 7.77,
+  "paid_by": "elie",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db95afa7a5c68bc6a37f41"
+  },
+  "date": "2025-01-01",
+  "description": "Label Stickers",
+  "amount": 4.5,
+  "paid_by": "elie",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db95c4a7a5c68bc6a37f44"
+  },
+  "date": "2025-01-01",
+  "description": "Mobile Recharge",
+  "amount": 5.22,
+  "paid_by": "elie",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db95d1a7a5c68bc6a37f47"
+  },
+  "date": "2025-01-01",
+  "description": "Boxes",
+  "amount": 39,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db95e2a7a5c68bc6a37f4a"
+  },
+  "date": "2025-01-01",
+  "description": "Mobile Recharge",
+  "amount": 8.63,
+  "paid_by": "elie",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db95faa7a5c68bc6a37f4d"
+  },
+  "date": "2025-01-01",
+  "description": "Boosting",
+  "amount": 35,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9659a7a5c68bc6a37f50"
+  },
+  "date": "2025-01-01",
+  "description": "Boosting",
+  "amount": 70,
+  "paid_by": "elie",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db966aa7a5c68bc6a37f53"
+  },
+  "date": "2025-01-01",
+  "description": "Breast + Kawaness",
+  "amount": 16.7,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9686a7a5c68bc6a37f56"
+  },
+  "date": "2025-01-01",
+  "description": "Liver + Gizzards",
+  "amount": 18.01,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db96a2a7a5c68bc6a37f59"
+  },
+  "date": "2025-01-01",
+  "description": "Ingredients",
+  "amount": 32.56,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db96afa7a5c68bc6a37f5c"
+  },
+  "date": "2025-01-01",
+  "description": "Ingredients",
+  "amount": 13.44,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db96c6a7a5c68bc6a37f5f"
+  },
+  "date": "2025-01-29",
+  "description": "Vegetables",
+  "amount": 10.1,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db96d9a7a5c68bc6a37f62"
+  },
+  "date": "2025-01-29",
+  "description": "Ingredients",
+  "amount": 20.88,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db96e7a7a5c68bc6a37f65"
+  },
+  "date": "2025-01-30",
+  "description": "Chicken",
+  "amount": 13.68,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db96fba7a5c68bc6a37f68"
+  },
+  "date": "2025-01-31",
+  "description": "Chicken",
+  "amount": 9.5,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db970ea7a5c68bc6a37f6b"
+  },
+  "date": "2025-02-06",
+  "description": "Stickers",
+  "amount": 25,
+  "paid_by": "elie",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9721a7a5c68bc6a37f6e"
+  },
+  "date": "2025-02-01",
+  "description": "Gas",
+  "amount": 12,
+  "paid_by": "elie",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db974aa7a5c68bc6a37f75"
+  },
+  "date": "2025-02-08",
+  "description": "Chicken",
+  "amount": 26.51,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9758a7a5c68bc6a37f78"
+  },
+  "date": "2025-02-08",
+  "description": "Vegetables",
+  "amount": 18.34,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db977fa7a5c68bc6a37f82"
+  },
+  "date": "2025-02-08",
+  "description": "Boosting",
+  "amount": 56,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db978ba7a5c68bc6a37f85"
+  },
+  "date": "2025-02-28",
+  "description": "Alfa",
+  "amount": 30,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9799a7a5c68bc6a37f88"
+  },
+  "date": "2025-02-28",
+  "description": "Chicken",
+  "amount": 15,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db97aaa7a5c68bc6a37f8b"
+  },
+  "date": "2025-04-09",
+  "description": "Ingredients",
+  "amount": 27,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db97c7a7a5c68bc6a37f90"
+  },
+  "date": "2025-04-12",
+  "description": "Ingredients",
+  "amount": 12.33,
+  "paid_by": "elie",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db97d4a7a5c68bc6a37f93"
+  },
+  "date": "2025-04-30",
+  "description": "Mobile",
+  "amount": 10,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9817a7a5c68bc6a37f9e"
+  },
+  "date": "2025-04-30",
+  "description": "Instagram",
+  "amount": 17,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db982da7a5c68bc6a37fa1"
+  },
+  "date": "2025-04-30",
+  "description": "Instagram",
+  "amount": 51,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9a4ba7a5c68bc6a37fde"
+  },
+  "date": "2025-04-30",
+  "description": "Bags",
+  "amount": 30,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9a59a7a5c68bc6a37fe1"
+  },
+  "date": "2025-05-23",
+  "description": "Fish",
+  "amount": 47.69,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9a6da7a5c68bc6a37fe4"
+  },
+  "date": "2025-08-01",
+  "description": "Ingredients",
+  "amount": 39,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9a7fa7a5c68bc6a37fe7"
+  },
+  "date": "2025-08-01",
+  "description": "Tanajir",
+  "amount": 205,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9a93a7a5c68bc6a37fea"
+  },
+  "date": "2026-01-22",
+  "description": "NA",
+  "amount": 38,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9aa5a7a5c68bc6a37fed"
+  },
+  "date": "2026-01-24",
+  "description": "NA",
+  "amount": 20,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9ab6a7a5c68bc6a37ff0"
+  },
+  "date": "2026-01-24",
+  "description": "Boosting",
+  "amount": 50,
+  "paid_by": "elie",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9acaa7a5c68bc6a37ff3"
+  },
+  "date": "2026-02-01",
+  "description": "Domain Name",
+  "amount": 13.19,
+  "paid_by": "elie",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9ad9a7a5c68bc6a37ff6"
+  },
+  "date": "2026-02-03",
+  "description": "Alfa",
+  "amount": 11.33,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9ae8a7a5c68bc6a37ff9"
+  },
+  "date": "2026-02-18",
+  "description": "Instagram",
+  "amount": 22,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9af4a7a5c68bc6a37ffc"
+  },
+  "date": "2026-02-18",
+  "description": "Beef",
+  "amount": 20,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9b06a7a5c68bc6a37fff"
+  },
+  "date": "2026-03-12",
+  "description": "Ingredients",
+  "amount": 43,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9b10a7a5c68bc6a38002"
+  },
+  "date": "2026-03-12",
+  "description": "Ingredients",
+  "amount": 11.5,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9b1fa7a5c68bc6a38005"
+  },
+  "date": "2026-03-12",
+  "description": "Ingredients",
+  "amount": 28,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9b2ca7a5c68bc6a38008"
+  },
+  "date": "2026-03-13",
+  "description": "Instagram",
+  "amount": 35,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9b39a7a5c68bc6a3800b"
+  },
+  "date": "2026-03-23",
+  "description": "Ingredients",
+  "amount": 52.64,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9b55a7a5c68bc6a38015"
+  },
+  "date": "2026-03-25",
+  "description": "Instagram",
+  "amount": 50,
+  "paid_by": "elie",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9b62a7a5c68bc6a38018"
+  },
+  "date": "2026-03-26",
+  "description": "Beef Ingredients",
+  "amount": 15.5,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9b73a7a5c68bc6a3801e"
+  },
+  "date": "2026-03-28",
+  "description": "Bags + Boxes",
+  "amount": 61,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9b82a7a5c68bc6a38021"
+  },
+  "date": "2026-03-30",
+  "description": "Ingredients",
+  "amount": 53.75,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9b96a7a5c68bc6a38024"
+  },
+  "date": "2026-04-01",
+  "description": "Boxes",
+  "amount": 15,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9b9ea7a5c68bc6a38027"
+  },
+  "date": "2026-04-02",
+  "description": "Ingredients",
+  "amount": 33.81,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9ba9a7a5c68bc6a3802a"
+  },
+  "date": "2026-04-03",
+  "description": "Ingredients",
+  "amount": 8.09,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9bb2a7a5c68bc6a3802d"
+  },
+  "date": "2026-04-10",
+  "description": "Ingredients",
+  "amount": 66,
+  "paid_by": "jimmy",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9c2ba7a5c68bc6a38043"
+  },
+  "date": "2026-04-11",
+  "description": "Development Render Mongo",
+  "amount": 20,
+  "paid_by": "elie",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9c7aa7a5c68bc6a38051"
+  },
+  "date": "2026-04-09",
+  "description": "Development Cursor",
+  "amount": 20,
+  "paid_by": "elie",
+  "__v": 0
+}]

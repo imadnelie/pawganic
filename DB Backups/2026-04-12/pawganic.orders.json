@@ -1,0 +1,1672 @@
+[{
+  "_id": {
+    "$oid": "69db8927466318674c5b49d9"
+  },
+  "customerId": {
+    "$oid": "69db86c6466318674c5b499d"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 1,
+  "totalPrice": 6,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "elie",
+  "deliveredAt": {
+    "$date": "2025-01-31T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 1,
+      "pricePerUnit": 6,
+      "subtotal": 6,
+      "_id": {
+        "$oid": "69db8927466318674c5b49da"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T11:59:35.377Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db8969466318674c5b49e8"
+  },
+  "customerId": {
+    "$oid": "69db875d466318674c5b49a3"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 5,
+  "totalPrice": 20,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2025-02-06T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 5,
+      "pricePerUnit": 4,
+      "subtotal": 20,
+      "_id": {
+        "$oid": "69db8969466318674c5b49e9"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:00:41.323Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db8983466318674c5b49f7"
+  },
+  "customerId": {
+    "$oid": "69db86c6466318674c5b499d"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 8,
+  "totalPrice": 40,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2025-02-08T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 8,
+      "pricePerUnit": 5,
+      "subtotal": 40,
+      "_id": {
+        "$oid": "69db8983466318674c5b49f8"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:01:07.675Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db899d466318674c5b4a06"
+  },
+  "customerId": {
+    "$oid": "69db87b3466318674c5b49af"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 5,
+  "totalPrice": 20,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2025-02-28T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 5,
+      "pricePerUnit": 4,
+      "subtotal": 20,
+      "_id": {
+        "$oid": "69db899d466318674c5b4a07"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:01:33.769Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db89da466318674c5b4a1c"
+  },
+  "customerId": {
+    "$oid": "69db89b4466318674c5b4a15"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 30,
+  "totalPrice": 78.89999999999999,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2025-01-31T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 30,
+      "pricePerUnit": 2.63,
+      "subtotal": 78.89999999999999,
+      "_id": {
+        "$oid": "69db89da466318674c5b4a1d"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:02:34.157Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db8a1d466318674c5b4a2b"
+  },
+  "customerId": {
+    "$oid": "69db879a466318674c5b49ac"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 1,
+  "totalPrice": 6,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2025-02-08T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 1,
+      "pricePerUnit": 6,
+      "subtotal": 6,
+      "_id": {
+        "$oid": "69db8a1d466318674c5b4a2c"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:03:41.135Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db8a3f466318674c5b4a43"
+  },
+  "customerId": {
+    "$oid": "69db86c6466318674c5b499d"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 5,
+  "totalPrice": 20,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2025-02-28T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 5,
+      "pricePerUnit": 4,
+      "subtotal": 20,
+      "_id": {
+        "$oid": "69db8a3f466318674c5b4a44"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:04:15.909Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db8a61466318674c5b4a52"
+  },
+  "customerId": {
+    "$oid": "69db875d466318674c5b49a3"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 5,
+  "totalPrice": 20,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2025-02-28T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 5,
+      "pricePerUnit": 4,
+      "subtotal": 20,
+      "_id": {
+        "$oid": "69db8a61466318674c5b4a53"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:04:49.200Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db8a7e466318674c5b4a61"
+  },
+  "customerId": {
+    "$oid": "69db86c6466318674c5b499d"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 8,
+  "totalPrice": 40,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2025-02-28T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 8,
+      "pricePerUnit": 5,
+      "subtotal": 40,
+      "_id": {
+        "$oid": "69db8a7e466318674c5b4a62"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:05:18.535Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db8adb466318674c5b4a70"
+  },
+  "customerId": {
+    "$oid": "69db89b4466318674c5b4a15"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 30,
+  "totalPrice": 78.60000000000001,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2025-02-28T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 30,
+      "pricePerUnit": 2.62,
+      "subtotal": 78.60000000000001,
+      "_id": {
+        "$oid": "69db8adb466318674c5b4a71"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:06:51.596Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db8afa466318674c5b4a88"
+  },
+  "customerId": {
+    "$oid": "69db8744466318674c5b49a0"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 30,
+  "totalPrice": 78.60000000000001,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2025-04-10T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 30,
+      "pricePerUnit": 2.62,
+      "subtotal": 78.60000000000001,
+      "_id": {
+        "$oid": "69db8afa466318674c5b4a89"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:07:22.812Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db8b09466318674c5b4a90"
+  },
+  "customerId": {
+    "$oid": "69db86c6466318674c5b499d"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 2,
+  "totalPrice": 10,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "elie",
+  "deliveredAt": {
+    "$date": "2025-06-03T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 2,
+      "pricePerUnit": 5,
+      "subtotal": 10,
+      "_id": {
+        "$oid": "69db8b09466318674c5b4a91"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:07:37.459Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db8b34466318674c5b4aa6"
+  },
+  "customerId": {
+    "$oid": "69db87d1466318674c5b49b2"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 1,
+  "totalPrice": 6,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2025-05-31T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 1,
+      "pricePerUnit": 6,
+      "subtotal": 6,
+      "_id": {
+        "$oid": "69db8b34466318674c5b4aa7"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:08:20.637Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db8b43466318674c5b4aae"
+  },
+  "customerId": {
+    "$oid": "69db87ee466318674c5b49b5"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 5,
+  "totalPrice": 20,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2025-05-31T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 5,
+      "pricePerUnit": 4,
+      "subtotal": 20,
+      "_id": {
+        "$oid": "69db8b43466318674c5b4aaf"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:08:35.690Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db8b4e466318674c5b4ab6"
+  },
+  "customerId": {
+    "$oid": "69db875d466318674c5b49a3"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 5,
+  "totalPrice": 20,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2025-05-31T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 5,
+      "pricePerUnit": 4,
+      "subtotal": 20,
+      "_id": {
+        "$oid": "69db8b4e466318674c5b4ab7"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:08:46.813Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db8bd6466318674c5b4adc"
+  },
+  "customerId": {
+    "$oid": "69db8744466318674c5b49a0"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 30,
+  "totalPrice": 78.60000000000001,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2025-08-13T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 30,
+      "pricePerUnit": 2.62,
+      "subtotal": 78.60000000000001,
+      "_id": {
+        "$oid": "69db8bd6466318674c5b4add"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:11:02.488Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db8beb466318674c5b4aeb"
+  },
+  "customerId": {
+    "$oid": "69db86c6466318674c5b499d"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 10,
+  "totalPrice": 50,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2025-08-13T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 10,
+      "pricePerUnit": 5,
+      "subtotal": 50,
+      "_id": {
+        "$oid": "69db8beb466318674c5b4aec"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:11:23.751Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db8c2b466318674c5b4b05"
+  },
+  "customerId": {
+    "$oid": "69db89b4466318674c5b4a15"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 30,
+  "totalPrice": 78.60000000000001,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2025-08-13T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 30,
+      "pricePerUnit": 2.62,
+      "subtotal": 78.60000000000001,
+      "_id": {
+        "$oid": "69db8c2b466318674c5b4b06"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:12:27.673Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db8c40466318674c5b4b14"
+  },
+  "customerId": {
+    "$oid": "69db86c6466318674c5b499d"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 10,
+  "totalPrice": 50,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "elie",
+  "deliveredAt": {
+    "$date": "2026-01-24T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 10,
+      "pricePerUnit": 5,
+      "subtotal": 50,
+      "_id": {
+        "$oid": "69db8c40466318674c5b4b15"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:12:48.923Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db8c68466318674c5b4b23"
+  },
+  "customerId": {
+    "$oid": "69db8811466318674c5b49b8"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 5,
+  "totalPrice": 15,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-02-03T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 5,
+      "pricePerUnit": 3,
+      "subtotal": 15,
+      "_id": {
+        "$oid": "69db8c68466318674c5b4b24"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:13:28.052Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db8c98466318674c5b4b32"
+  },
+  "customerId": {
+    "$oid": "69db8744466318674c5b49a0"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 30,
+  "totalPrice": 78.60000000000001,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-02-10T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 30,
+      "pricePerUnit": 2.62,
+      "subtotal": 78.60000000000001,
+      "_id": {
+        "$oid": "69db8c98466318674c5b4b33"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:14:16.331Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db8cb7466318674c5b4b41"
+  },
+  "customerId": {
+    "$oid": "69db8831466318674c5b49bb"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 5,
+  "totalPrice": 15,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-02-17T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 5,
+      "pricePerUnit": 3,
+      "subtotal": 15,
+      "_id": {
+        "$oid": "69db8cb7466318674c5b4b42"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:14:47.295Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db8d22466318674c5b4b5d"
+  },
+  "customerId": {
+    "$oid": "69db8ce3466318674c5b4b50"
+  },
+  "mealType": "beef_with_rice",
+  "quantity": 10,
+  "totalPrice": 35,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-03-14T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "beef_with_rice",
+      "quantity": 10,
+      "pricePerUnit": 3.5,
+      "subtotal": 35,
+      "_id": {
+        "$oid": "69db8d22466318674c5b4b5e"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:16:34.336Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db8d34466318674c5b4b6c"
+  },
+  "customerId": {
+    "$oid": "69db88f8466318674c5b49d0"
+  },
+  "mealType": "beef_with_rice",
+  "quantity": 9,
+  "totalPrice": 31.5,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-03-14T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "beef_with_rice",
+      "quantity": 9,
+      "pricePerUnit": 3.5,
+      "subtotal": 31.5,
+      "_id": {
+        "$oid": "69db8d34466318674c5b4b6d"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:16:52.022Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db8d98466318674c5b4b8b"
+  },
+  "customerId": {
+    "$oid": "69db8d88466318674c5b4b84"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 4,
+  "totalPrice": 13,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-03-14T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 2,
+      "pricePerUnit": 3,
+      "subtotal": 6,
+      "_id": {
+        "$oid": "69db8d98466318674c5b4b8c"
+      }
+    },
+    {
+      "mealType": "beef_with_rice",
+      "quantity": 2,
+      "pricePerUnit": 3.5,
+      "subtotal": 7,
+      "_id": {
+        "$oid": "69db8d98466318674c5b4b8d"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:18:32.471Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9215a7a5c68bc6a37da4"
+  },
+  "customerId": {
+    "$oid": "69db87d1466318674c5b49b2"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 10,
+  "totalPrice": 30,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-03-14T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 10,
+      "pricePerUnit": 3,
+      "subtotal": 30,
+      "_id": {
+        "$oid": "69db9215a7a5c68bc6a37da5"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:37:41.163Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db922aa7a5c68bc6a37db3"
+  },
+  "customerId": {
+    "$oid": "69db86c6466318674c5b499d"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 15,
+  "totalPrice": 45,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-03-14T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 15,
+      "pricePerUnit": 3,
+      "subtotal": 45,
+      "_id": {
+        "$oid": "69db922aa7a5c68bc6a37db4"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:38:02.877Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9244a7a5c68bc6a37dc2"
+  },
+  "customerId": {
+    "$oid": "69db884b466318674c5b49be"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 4,
+  "totalPrice": 12,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-03-17T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 4,
+      "pricePerUnit": 3,
+      "subtotal": 12,
+      "_id": {
+        "$oid": "69db9244a7a5c68bc6a37dc3"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:38:28.802Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db925ea7a5c68bc6a37dd1"
+  },
+  "customerId": {
+    "$oid": "69db885e466318674c5b49c1"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 2,
+  "totalPrice": 6.5,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-03-25T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 1,
+      "pricePerUnit": 3,
+      "subtotal": 3,
+      "_id": {
+        "$oid": "69db925ea7a5c68bc6a37dd2"
+      }
+    },
+    {
+      "mealType": "beef_with_rice",
+      "quantity": 1,
+      "pricePerUnit": 3.5,
+      "subtotal": 3.5,
+      "_id": {
+        "$oid": "69db925ea7a5c68bc6a37dd3"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:38:54.411Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9276a7a5c68bc6a37de2"
+  },
+  "customerId": {
+    "$oid": "69db886d466318674c5b49c4"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 2,
+  "totalPrice": 6.5,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-03-25T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 1,
+      "pricePerUnit": 3,
+      "subtotal": 3,
+      "_id": {
+        "$oid": "69db9276a7a5c68bc6a37de3"
+      }
+    },
+    {
+      "mealType": "beef_with_rice",
+      "quantity": 1,
+      "pricePerUnit": 3.5,
+      "subtotal": 3.5,
+      "_id": {
+        "$oid": "69db9276a7a5c68bc6a37de4"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:39:18.602Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db92c3a7a5c68bc6a37dfd"
+  },
+  "customerId": {
+    "$oid": "69db88a8466318674c5b49c7"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 6,
+  "totalPrice": 19.5,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-03-25T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 3,
+      "pricePerUnit": 3,
+      "subtotal": 9,
+      "_id": {
+        "$oid": "69db92c3a7a5c68bc6a37dfe"
+      }
+    },
+    {
+      "mealType": "beef_with_rice",
+      "quantity": 3,
+      "pricePerUnit": 3.5,
+      "subtotal": 10.5,
+      "_id": {
+        "$oid": "69db92c3a7a5c68bc6a37dff"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:40:35.360Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db92dfa7a5c68bc6a37e0e"
+  },
+  "customerId": {
+    "$oid": "69db88bb466318674c5b49ca"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 10,
+  "totalPrice": 33.5,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-03-28T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 3,
+      "pricePerUnit": 3,
+      "subtotal": 9,
+      "_id": {
+        "$oid": "69db92dfa7a5c68bc6a37e0f"
+      }
+    },
+    {
+      "mealType": "beef_with_rice",
+      "quantity": 7,
+      "pricePerUnit": 3.5,
+      "subtotal": 24.5,
+      "_id": {
+        "$oid": "69db92dfa7a5c68bc6a37e10"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:41:03.972Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db92fda7a5c68bc6a37e1f"
+  },
+  "customerId": {
+    "$oid": "69db88ce466318674c5b49cd"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 4,
+  "totalPrice": 13,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-03-28T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 2,
+      "pricePerUnit": 3,
+      "subtotal": 6,
+      "_id": {
+        "$oid": "69db92fda7a5c68bc6a37e20"
+      }
+    },
+    {
+      "mealType": "beef_with_rice",
+      "quantity": 2,
+      "pricePerUnit": 3.5,
+      "subtotal": 7,
+      "_id": {
+        "$oid": "69db92fda7a5c68bc6a37e21"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:41:33.697Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9318a7a5c68bc6a37e30"
+  },
+  "customerId": {
+    "$oid": "69db8ce3466318674c5b4b50"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 5,
+  "totalPrice": 15.5,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-03-28T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 4,
+      "pricePerUnit": 3,
+      "subtotal": 12,
+      "_id": {
+        "$oid": "69db9318a7a5c68bc6a37e31"
+      }
+    },
+    {
+      "mealType": "beef_with_rice",
+      "quantity": 1,
+      "pricePerUnit": 3.5,
+      "subtotal": 3.5,
+      "_id": {
+        "$oid": "69db9318a7a5c68bc6a37e32"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:42:00.153Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9327a7a5c68bc6a37e41"
+  },
+  "customerId": {
+    "$oid": "69db87d1466318674c5b49b2"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 10,
+  "totalPrice": 30,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-03-28T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 10,
+      "pricePerUnit": 3,
+      "subtotal": 30,
+      "_id": {
+        "$oid": "69db9327a7a5c68bc6a37e42"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:42:15.115Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9343a7a5c68bc6a37e50"
+  },
+  "customerId": {
+    "$oid": "69db8744466318674c5b49a0"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 30,
+  "totalPrice": 78.89999999999999,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-03-28T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 30,
+      "pricePerUnit": 2.63,
+      "subtotal": 78.89999999999999,
+      "_id": {
+        "$oid": "69db9343a7a5c68bc6a37e51"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:42:43.395Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db938ea7a5c68bc6a37e66"
+  },
+  "customerId": {
+    "$oid": "69db9380a7a5c68bc6a37e5f"
+  },
+  "mealType": "beef_with_rice",
+  "quantity": 10,
+  "totalPrice": 35,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-03-28T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "beef_with_rice",
+      "quantity": 10,
+      "pricePerUnit": 3.5,
+      "subtotal": 35,
+      "_id": {
+        "$oid": "69db938ea7a5c68bc6a37e67"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:43:58.225Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db93a3a7a5c68bc6a37e75"
+  },
+  "customerId": {
+    "$oid": "69db88f8466318674c5b49d0"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 19,
+  "totalPrice": 61.5,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-03-31T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 10,
+      "pricePerUnit": 3,
+      "subtotal": 30,
+      "_id": {
+        "$oid": "69db93a3a7a5c68bc6a37e76"
+      }
+    },
+    {
+      "mealType": "beef_with_rice",
+      "quantity": 9,
+      "pricePerUnit": 3.5,
+      "subtotal": 31.5,
+      "_id": {
+        "$oid": "69db93a3a7a5c68bc6a37e77"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:44:19.752Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db93dea7a5c68bc6a37e8d"
+  },
+  "customerId": {
+    "$oid": "69db93cfa7a5c68bc6a37e86"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 6,
+  "totalPrice": 18,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-04-02T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 6,
+      "pricePerUnit": 3,
+      "subtotal": 18,
+      "_id": {
+        "$oid": "69db93dea7a5c68bc6a37e8e"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:45:18.187Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9404a7a5c68bc6a37e9c"
+  },
+  "customerId": {
+    "$oid": "69db86c6466318674c5b499d"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 10,
+  "totalPrice": 30,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-04-04T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 10,
+      "pricePerUnit": 3,
+      "subtotal": 30,
+      "_id": {
+        "$oid": "69db9404a7a5c68bc6a37e9d"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:45:56.875Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db942ea7a5c68bc6a37eab"
+  },
+  "customerId": {
+    "$oid": "69db88f8466318674c5b49d0"
+  },
+  "mealType": "beef_with_rice",
+  "quantity": 10,
+  "totalPrice": 35,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-04-10T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "beef_with_rice",
+      "quantity": 10,
+      "pricePerUnit": 3.5,
+      "subtotal": 35,
+      "_id": {
+        "$oid": "69db942ea7a5c68bc6a37eac"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:46:38.469Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9448a7a5c68bc6a37eba"
+  },
+  "customerId": {
+    "$oid": "69db8914466318674c5b49d3"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 10,
+  "totalPrice": 30,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-04-10T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 10,
+      "pricePerUnit": 3,
+      "subtotal": 30,
+      "_id": {
+        "$oid": "69db9448a7a5c68bc6a37ebb"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:47:04.341Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9478a7a5c68bc6a37ed0"
+  },
+  "customerId": {
+    "$oid": "69db946da7a5c68bc6a37ec9"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 2,
+  "totalPrice": 6,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-04-11T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 2,
+      "pricePerUnit": 3,
+      "subtotal": 6,
+      "_id": {
+        "$oid": "69db9478a7a5c68bc6a37ed1"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:47:52.825Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db94a9a7a5c68bc6a37ee6"
+  },
+  "customerId": {
+    "$oid": "69db949ba7a5c68bc6a37edf"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 2,
+  "totalPrice": 6.5,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-04-11T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 1,
+      "pricePerUnit": 3,
+      "subtotal": 3,
+      "_id": {
+        "$oid": "69db94a9a7a5c68bc6a37ee7"
+      }
+    },
+    {
+      "mealType": "beef_with_rice",
+      "quantity": 1,
+      "pricePerUnit": 3.5,
+      "subtotal": 3.5,
+      "_id": {
+        "$oid": "69db94a9a7a5c68bc6a37ee8"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:48:41.536Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db94d9a7a5c68bc6a37efe"
+  },
+  "customerId": {
+    "$oid": "69db94c7a7a5c68bc6a37ef7"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 5,
+  "totalPrice": 16,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-04-11T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 3,
+      "pricePerUnit": 3,
+      "subtotal": 9,
+      "_id": {
+        "$oid": "69db94d9a7a5c68bc6a37eff"
+      }
+    },
+    {
+      "mealType": "beef_with_rice",
+      "quantity": 2,
+      "pricePerUnit": 3.5,
+      "subtotal": 7,
+      "_id": {
+        "$oid": "69db94d9a7a5c68bc6a37f00"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:49:29.516Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9506a7a5c68bc6a37f16"
+  },
+  "customerId": {
+    "$oid": "69db94f7a7a5c68bc6a37f0f"
+  },
+  "mealType": "fish_with_rice",
+  "quantity": 10,
+  "totalPrice": 40,
+  "status": "delivered",
+  "createdBy": "elie",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-04-11T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "fish_with_rice",
+      "quantity": 10,
+      "pricePerUnit": 4,
+      "subtotal": 40,
+      "_id": {
+        "$oid": "69db9d40a7a5c68bc6a3806a"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T12:50:14.806Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9961a7a5c68bc6a37fbd"
+  },
+  "customerId": {
+    "$oid": "69db9928a7a5c68bc6a37fb6"
+  },
+  "mealType": "chicken_with_rice",
+  "quantity": 15,
+  "totalPrice": 45,
+  "status": "delivered",
+  "createdBy": "jimmy",
+  "deliveredBy": null,
+  "paidTo": "jimmy",
+  "deliveredAt": {
+    "$date": "2026-04-11T12:00:00.000Z"
+  },
+  "items": [
+    {
+      "mealType": "chicken_with_rice",
+      "quantity": 15,
+      "pricePerUnit": 3,
+      "subtotal": 45,
+      "_id": {
+        "$oid": "69db9961a7a5c68bc6a37fbe"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T13:08:49.479Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69db9f69a7a5c68bc6a38092"
+  },
+  "customerId": {
+    "$oid": "69db886d466318674c5b49c4"
+  },
+  "mealType": "beef_with_rice",
+  "quantity": 4,
+  "totalPrice": 14,
+  "status": "pending",
+  "createdBy": "jimmy",
+  "deliveredBy": null,
+  "paidTo": null,
+  "deliveredAt": null,
+  "items": [
+    {
+      "mealType": "beef_with_rice",
+      "quantity": 4,
+      "pricePerUnit": 3.5,
+      "subtotal": 14,
+      "_id": {
+        "$oid": "69db9f69a7a5c68bc6a38093"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-04-12T13:34:33.479Z"
+  },
+  "__v": 0
+}]
