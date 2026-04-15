@@ -24,7 +24,7 @@ export default function Balance() {
     <div>
       <h1 className="hidden text-2xl font-semibold text-slate-900 lg:block">Balance</h1>
       <p className="mt-0 text-sm leading-relaxed text-slate-500 lg:mt-1">
-        Partnership split: 50% of net profit each, adjusted for who collected revenue and who paid
+        Partnership split: 50% of net profit each, adjusted for who collected food revenue and who paid
         expenses.
       </p>
 

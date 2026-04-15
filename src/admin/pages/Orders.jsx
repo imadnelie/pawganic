@@ -24,6 +24,7 @@ export default function Orders() {
   const [newForm, setNewForm] = useState({
     customerId: "",
     items: [{ mealType: "chicken_with_rice", quantity: 1, pricePerUnit: "" }],
+    deliveryAmount: 0,
   });
 
   const [deliverModal, setDeliverModal] = useState(null);
@@ -36,13 +37,15 @@ export default function Orders() {
   const [editForm, setEditForm] = useState({
     customerId: "",
     items: [{ mealType: "chicken_with_rice", quantity: 1, pricePerUnit: "" }],
+    deliveryAmount: 0,
     status: "pending",
     paidTo: "elie",
     deliveredDate: new Date().toISOString().slice(0, 10),
   });
 
-  const calcTotal = (items) =>
+  const calcSubtotal = (items) =>
     items.reduce((sum, it) => sum + Number(it.quantity || 0) * Number(it.pricePerUnit || 0), 0);
+  const calcGrandTotal = (items, deliveryAmount) => calcSubtotal(items) + Number(deliveryAmount || 0);
 
   const loadOrders = () => {
     const q = new URLSearchParams();
@@ -72,12 +75,14 @@ export default function Orders() {
             quantity: Number(it.quantity),
             pricePerUnit: Number(it.pricePerUnit),
           })),
+          deliveryAmount: Number(newForm.deliveryAmount || 0),
         },
       });
       setNewModal(false);
       setNewForm({
         customerId: "",
         items: [{ mealType: "chicken_with_rice", quantity: 1, pricePerUnit: "" }],
+        deliveryAmount: 0,
       });
       await loadOrders();
     } catch (ex) {
@@ -118,6 +123,7 @@ export default function Orders() {
         quantity: it.quantity,
         pricePerUnit: it.pricePerUnit,
       })),
+      deliveryAmount: Number(o.deliveryAmount || 0),
       status: o.status,
       paidTo: o.paidTo || "elie",
       deliveredDate: o.deliveredAt
@@ -140,6 +146,7 @@ export default function Orders() {
             quantity: Number(it.quantity),
             pricePerUnit: Number(it.pricePerUnit),
           })),
+          deliveryAmount: Number(editForm.deliveryAmount || 0),
           status: editForm.status,
           paidTo: editForm.status === "delivered" ? editForm.paidTo : null,
           deliveredDate: editForm.status === "delivered" ? editForm.deliveredDate : null,
@@ -254,7 +261,11 @@ export default function Orders() {
                   <td className="px-3 py-3 text-slate-600">
                     {(o.items || []).reduce((s, it) => s + Number(it.quantity || 0), 0)}
                   </td>
-                  <td className="px-3 py-3 text-slate-600">{money(o.totalPrice)}</td>
+                  <td className="px-3 py-3 text-slate-600">
+                    <div className="text-xs">Subtotal: {money(o.businessSubtotal ?? o.totalPrice ?? 0)}</div>
+                    <div className="text-xs">Delivery: {money(o.deliveryAmount || 0)}</div>
+                    <div className="font-semibold">Total: {money(o.totalPrice)}</div>
+                  </td>
                   <td className="px-3 py-3">
                     <StatusBadge status={o.status} />
                   </td>
@@ -425,9 +436,22 @@ export default function Orders() {
                 + Add item
               </button>
               <div className="text-right text-sm font-semibold text-slate-700">
-                Total: {money(calcTotal(newForm.items))}
+                <div>Items subtotal: {money(calcSubtotal(newForm.items))}</div>
+                <div>Delivery: {money(newForm.deliveryAmount)}</div>
+                <div>Grand total: {money(calcGrandTotal(newForm.items, newForm.deliveryAmount))}</div>
               </div>
             </div>
+          </div>
+          <div>
+            <label className="text-xs font-medium text-slate-600">Delivery</label>
+            <input
+              type="number"
+              min={0}
+              step="0.01"
+              className="mt-1 block w-full rounded-lg border-slate-300 text-sm"
+              value={newForm.deliveryAmount}
+              onChange={(e) => setNewForm((f) => ({ ...f, deliveryAmount: e.target.value }))}
+            />
           </div>
         </form>
       </Modal>
@@ -457,7 +481,8 @@ export default function Orders() {
       >
         {deliverModal ? (
           <p className="mb-3 text-sm text-slate-600">
-            Order #{deliverModal.id} · {money(deliverModal.totalPrice)}
+            Order #{deliverModal.id} · Subtotal {money(deliverModal.businessSubtotal ?? deliverModal.totalPrice ?? 0)} · Delivery{" "}
+            {money(deliverModal.deliveryAmount || 0)} · Total {money(deliverModal.totalPrice)}
           </p>
         ) : null}
         {err && deliverModal ? <p className="mb-3 text-sm text-red-600">{err}</p> : null}
@@ -649,9 +674,22 @@ export default function Orders() {
                 + Add item
               </button>
               <div className="text-right text-sm font-semibold text-slate-700">
-                Total: {money(calcTotal(editForm.items))}
+                <div>Items subtotal: {money(calcSubtotal(editForm.items))}</div>
+                <div>Delivery: {money(editForm.deliveryAmount)}</div>
+                <div>Grand total: {money(calcGrandTotal(editForm.items, editForm.deliveryAmount))}</div>
               </div>
             </div>
+          </div>
+          <div>
+            <label className="text-xs font-medium text-slate-600">Delivery</label>
+            <input
+              type="number"
+              min={0}
+              step="0.01"
+              className="mt-1 block w-full rounded-lg border-slate-300 text-sm"
+              value={editForm.deliveryAmount}
+              onChange={(e) => setEditForm((f) => ({ ...f, deliveryAmount: e.target.value }))}
+            />
           </div>
           {editForm.status === "delivered" ? (
             <div className="grid grid-cols-2 gap-3">

@@ -18,6 +18,8 @@ const orderSchema = new mongoose.Schema(
     customerId: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", required: true },
     mealType: { type: String, required: true },
     quantity: { type: Number, required: true },
+    businessSubtotal: { type: Number, required: true },
+    deliveryAmount: { type: Number, default: 0 },
     totalPrice: { type: Number, required: true },
     status: { type: String, enum: ["pending", "delivered"], default: "pending" },
     createdBy: { type: String, required: true },

@@ -192,7 +192,7 @@ export default function CustomerDetail() {
               <thead className="bg-slate-50">
                 <tr>
                   <th className="px-3 py-2 text-left font-semibold text-slate-700">Items</th>
-                  <th className="px-3 py-2 text-left font-semibold text-slate-700">Total</th>
+                  <th className="px-3 py-2 text-left font-semibold text-slate-700">Totals</th>
                   <th className="px-3 py-2 text-left font-semibold text-slate-700">Status</th>
                   <th className="px-3 py-2 text-left font-semibold text-slate-700">Paid to</th>
                   <th className="px-3 py-2 text-left font-semibold text-slate-700">Dates</th>
@@ -217,7 +217,11 @@ export default function CustomerDetail() {
                           ))}
                         </div>
                       </td>
-                      <td className="px-3 py-2 text-slate-600">{money(o.totalPrice)}</td>
+                      <td className="px-3 py-2 text-slate-600">
+                        <div className="text-xs">Subtotal: {money(o.businessSubtotal ?? o.totalPrice ?? 0)}</div>
+                        <div className="text-xs">Delivery: {money(o.deliveryAmount || 0)}</div>
+                        <div className="font-semibold">Total: {money(o.totalPrice)}</div>
+                      </td>
                       <td className="px-3 py-2">
                         <StatusBadge status={o.status} />
                       </td>

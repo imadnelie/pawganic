@@ -18,6 +18,8 @@ function docToOrder(doc) {
     customerLastName: c?.last_name ?? "",
     mealType: doc.mealType,
     quantity: doc.quantity,
+    businessSubtotal: Number(doc.businessSubtotal ?? doc.totalPrice ?? 0),
+    deliveryAmount: Number(doc.deliveryAmount ?? 0),
     totalPrice: doc.totalPrice,
     status: doc.status,
     createdBy: doc.createdBy,
@@ -47,6 +49,15 @@ function parseItems(itemsInput) {
   return { items };
 }
 
+function parseDeliveryAmount(input) {
+  if (input == null || input === "") return { value: 0 };
+  const value = Number(input);
+  if (!Number.isFinite(value) || value < 0) {
+    return { error: "Delivery amount must be a number >= 0" };
+  }
+  return { value };
+}
+
 function withItems(docs) {
   return docs.map((doc) => {
     const base = docToOrder(doc);
@@ -59,7 +70,8 @@ function withItems(docs) {
     }));
     if (!items.length) {
       const qty = Number(doc.quantity) > 0 ? Number(doc.quantity) : 1;
-      const subtotal = Number(doc.totalPrice) || 0;
+      const deliveryAmount = Number(doc.deliveryAmount || 0);
+      const subtotal = Number(doc.businessSubtotal ?? (Number(doc.totalPrice || 0) - deliveryAmount)) || 0;
       items = [
         {
           id: null,
@@ -111,11 +123,15 @@ r.get("/customer/:customerId", requireAdminOrUser, async (req, res) => {
 
 r.post("/", requireAdminOrUser, async (req, res) => {
   try {
-    const { customerId, items: itemsInput } = req.body || {};
+    const { customerId, items: itemsInput, deliveryAmount: deliveryAmountInput } = req.body || {};
     const parsed = parseItems(itemsInput);
     if (parsed.error) return res.status(400).json({ error: parsed.error });
     const items = parsed.items;
-    const totalPrice = items.reduce((s, i) => s + i.subtotal, 0);
+    const parsedDelivery = parseDeliveryAmount(deliveryAmountInput);
+    if (parsedDelivery.error) return res.status(400).json({ error: parsedDelivery.error });
+    const deliveryAmount = parsedDelivery.value;
+    const businessSubtotal = items.reduce((s, i) => s + i.subtotal, 0);
+    const totalPrice = businessSubtotal + deliveryAmount;
     if (!mongoose.isValidObjectId(String(customerId))) {
       return res.status(400).json({ error: "Customer not found" });
     }
@@ -131,6 +147,8 @@ r.post("/", requireAdminOrUser, async (req, res) => {
       customerId: cust._id,
       mealType: first.mealType,
       quantity: totalQty,
+      businessSubtotal,
+      deliveryAmount,
       totalPrice,
       status: "pending",
       createdBy: username,
@@ -191,12 +209,16 @@ r.put("/:id", requireAdmin, async (req, res) => {
     const order = await Order.findById(id).lean();
     if (!order) return res.status(404).json({ error: "Order not found" });
 
-    const { customerId, items: itemsInput, status, paidTo, deliveredDate } = req.body || {};
+    const { customerId, items: itemsInput, status, paidTo, deliveredDate, deliveryAmount: deliveryAmountInput } = req.body || {};
     const cid = String(customerId);
     const parsed = parseItems(itemsInput);
     if (parsed.error) return res.status(400).json({ error: parsed.error });
     const items = parsed.items;
-    const totalPrice = items.reduce((s, i) => s + i.subtotal, 0);
+    const parsedDelivery = parseDeliveryAmount(deliveryAmountInput);
+    if (parsedDelivery.error) return res.status(400).json({ error: parsedDelivery.error });
+    const deliveryAmount = parsedDelivery.value;
+    const businessSubtotal = items.reduce((s, i) => s + i.subtotal, 0);
+    const totalPrice = businessSubtotal + deliveryAmount;
     const totalQty = items.reduce((s, i) => s + i.quantity, 0);
     const first = items[0];
     const s = String(status || "").toLowerCase();
@@ -221,6 +243,8 @@ r.put("/:id", requireAdmin, async (req, res) => {
       customerId: cust._id,
       mealType: first.mealType,
       quantity: totalQty,
+      businessSubtotal,
+      deliveryAmount,
       totalPrice,
       status: s,
       deliveredBy: null,

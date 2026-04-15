@@ -86,13 +86,13 @@ export default function Dashboard() {
         Financial summary (partners)
       </h2>
       <p className="mt-1 text-xs text-slate-500">
-        Revenue uses delivered orders only (by who received payment). Expenses split by who paid.
+        Revenue uses delivered order food subtotal only (delivery excluded). Expenses split by who paid.
       </p>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-3">
         <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/50 p-5 shadow-sm">
           <h3 className="text-sm font-bold text-emerald-900">Revenue</h3>
-          <p className="mt-0.5 text-xs text-emerald-800/80">Delivered orders · paid_to partner</p>
+          <p className="mt-0.5 text-xs text-emerald-800/80">Delivered orders (food subtotal only) · paid_to partner</p>
           <div className="mt-4">
             <BreakdownRow label="Total revenue" amount={data.totalRevenue} tone="revenue" />
             <BreakdownRow label="Elie received" amount={data.revenueToElie} tone="revenue" />
@@ -147,7 +147,7 @@ export default function Dashboard() {
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-slate-900">Revenue by meal (delivered)</h2>
+          <h2 className="text-sm font-semibold text-slate-900">Revenue by meal (delivered, food only)</h2>
           <div className="mt-4 space-y-3">
             {data.revenueByMeal.length === 0 ? (
               <p className="text-sm text-slate-500">No delivered orders yet.</p>

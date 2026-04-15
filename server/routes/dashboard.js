@@ -21,6 +21,12 @@ r.get("/summary", requireAdminOrUser, async (req, res) => {
       { $match: { status: "delivered" } },
       {
         $addFields: {
+          businessRevenue: {
+            $ifNull: [
+              "$businessSubtotal",
+              { $subtract: [{ $ifNull: ["$totalPrice", 0] }, { $ifNull: ["$deliveryAmount", 0] }] },
+            ],
+          },
           receiver: {
             $toLower: {
               $trim: {
@@ -33,9 +39,9 @@ r.get("/summary", requireAdminOrUser, async (req, res) => {
       {
         $group: {
           _id: null,
-          totalRevenue: { $sum: "$totalPrice" },
-          revenueToElie: { $sum: { $cond: [{ $eq: ["$receiver", "elie"] }, "$totalPrice", 0] } },
-          revenueToJimmy: { $sum: { $cond: [{ $eq: ["$receiver", "jimmy"] }, "$totalPrice", 0] } },
+          totalRevenue: { $sum: "$businessRevenue" },
+          revenueToElie: { $sum: { $cond: [{ $eq: ["$receiver", "elie"] }, "$businessRevenue", 0] } },
+          revenueToJimmy: { $sum: { $cond: [{ $eq: ["$receiver", "jimmy"] }, "$businessRevenue", 0] } },
         },
       },
     ]);
