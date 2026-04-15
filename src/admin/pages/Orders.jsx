@@ -116,17 +116,12 @@ export default function Orders() {
     if (!deliverModal) return;
     setErr("");
     try {
-      const body = canAdminOrders
-        ? {
-            paidTo: deliverForm.paidTo,
-            deliveredDate: deliverForm.deliveredDate,
-          }
-        : {
-            status: "delivered",
-          };
       await api(`/orders/${deliverModal.id}/deliver`, {
         method: "POST",
-        body,
+        body: {
+          paidTo: deliverForm.paidTo,
+          deliveredDate: deliverForm.deliveredDate,
+        },
       });
       setDeliverModal(null);
       await loadOrders();
@@ -517,38 +512,30 @@ export default function Orders() {
         ) : null}
         {err && deliverModal ? <p className="mb-3 text-sm text-red-600">{err}</p> : null}
         <form id="deliver-form" onSubmit={submitDeliver} className="space-y-3">
-          {canAdminOrders ? (
-            <>
-              <div>
-                <label className="text-xs font-medium text-slate-600">Payment received by</label>
-                <select
-                  className="mt-1 block w-full rounded-lg border-slate-300 text-sm"
-                  value={deliverForm.paidTo}
-                  onChange={(e) => setDeliverForm((f) => ({ ...f, paidTo: e.target.value }))}
-                >
-                  {PARTNERS.map((p) => (
-                    <option key={p.value} value={p.value}>
-                      {p.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="text-xs font-medium text-slate-600">Delivery date</label>
-                <input
-                  type="date"
-                  required
-                  className="mt-1 block w-full rounded-lg border-slate-300 text-sm"
-                  value={deliverForm.deliveredDate}
-                  onChange={(e) => setDeliverForm((f) => ({ ...f, deliveredDate: e.target.value }))}
-                />
-              </div>
-            </>
-          ) : (
-            <p className="text-sm text-slate-600">
-              This will mark the order as delivered now. Date/time is set automatically.
-            </p>
-          )}
+          <div>
+            <label className="text-xs font-medium text-slate-600">Payment received by</label>
+            <select
+              className="mt-1 block w-full rounded-lg border-slate-300 text-sm"
+              value={deliverForm.paidTo}
+              onChange={(e) => setDeliverForm((f) => ({ ...f, paidTo: e.target.value }))}
+            >
+              {PARTNERS.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs font-medium text-slate-600">Delivery date</label>
+            <input
+              type="date"
+              required
+              className="mt-1 block w-full rounded-lg border-slate-300 text-sm"
+              value={deliverForm.deliveredDate}
+              onChange={(e) => setDeliverForm((f) => ({ ...f, deliveredDate: e.target.value }))}
+            />
+          </div>
         </form>
       </Modal>
       <Modal

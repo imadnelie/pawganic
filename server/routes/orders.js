@@ -179,8 +179,18 @@ r.post("/:id/deliver", requireAdminOrUser, async (req, res) => {
     let pTo = null;
     let deliveredAt = null;
 
-    if (role === "admin") {
+    if (role === "admin" || role === "user") {
       const { paidTo, deliveredDate } = body;
+      const forbiddenFields = Object.keys(body).filter(
+        (k) => !["status", "deliveredAt", "paidTo", "deliveredDate"].includes(k)
+      );
+      if (forbiddenFields.length) {
+        return res.status(400).json({ error: "Staff can only mark order as delivered" });
+      }
+      if (role === "user" && body.status != null && String(body.status).toLowerCase() !== "delivered") {
+        return res.status(400).json({ error: "Staff can only set status to delivered" });
+      }
+
       pTo = String(paidTo || "").toLowerCase();
       if (!isPartner(pTo)) {
         return res.status(400).json({ error: "paidTo must be elie or jimmy" });
@@ -190,21 +200,10 @@ r.post("/:id/deliver", requireAdminOrUser, async (req, res) => {
         return res.status(400).json({ error: "deliveredDate is required (YYYY-MM-DD)" });
       }
       deliveredAt = new Date(`${dateText}T12:00:00.000Z`);
-    } else if (role === "user") {
-      const forbiddenFields = Object.keys(body).filter(
-        (k) => !["status", "deliveredAt", "paidTo", "deliveredDate"].includes(k)
-      );
-      if (forbiddenFields.length) {
-        return res.status(400).json({ error: "Staff can only mark order as delivered" });
+
+      if (role === "user" && !isPartner(username)) {
+        return res.status(400).json({ error: "Invalid session user for delivery action" });
       }
-      if (body.status != null && String(body.status).toLowerCase() !== "delivered") {
-        return res.status(400).json({ error: "Staff can only set status to delivered" });
-      }
-      if (!isPartner(username)) {
-        return res.status(400).json({ error: "Invalid session user for delivery receiver" });
-      }
-      pTo = username;
-      deliveredAt = new Date();
     } else {
       return res.status(403).json({ error: "Forbidden" });
     }
