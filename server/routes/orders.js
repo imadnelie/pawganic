@@ -167,27 +167,52 @@ r.post("/", requireAdminOrUser, async (req, res) => {
   }
 });
 
-r.post("/:id/deliver", requireAdmin, async (req, res) => {
+r.post("/:id/deliver", requireAdminOrUser, async (req, res) => {
   try {
     const id = req.params.id;
     if (!mongoose.isValidObjectId(id)) {
       return res.status(400).json({ error: "Invalid order id" });
     }
-    const { paidTo, deliveredDate } = req.body || {};
-    const pTo = String(paidTo || "").toLowerCase();
-    if (!isPartner(pTo)) {
-      return res.status(400).json({ error: "paidTo must be elie or jimmy" });
-    }
-    const dateText = String(deliveredDate || "").trim();
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateText)) {
-      return res.status(400).json({ error: "deliveredDate is required (YYYY-MM-DD)" });
+    const role = String(req.user?.role || "");
+    const username = String(req.user?.username || "").toLowerCase().trim();
+    const body = req.body && typeof req.body === "object" ? req.body : {};
+    let pTo = null;
+    let deliveredAt = null;
+
+    if (role === "admin") {
+      const { paidTo, deliveredDate } = body;
+      pTo = String(paidTo || "").toLowerCase();
+      if (!isPartner(pTo)) {
+        return res.status(400).json({ error: "paidTo must be elie or jimmy" });
+      }
+      const dateText = String(deliveredDate || "").trim();
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(dateText)) {
+        return res.status(400).json({ error: "deliveredDate is required (YYYY-MM-DD)" });
+      }
+      deliveredAt = new Date(`${dateText}T12:00:00.000Z`);
+    } else if (role === "user") {
+      const forbiddenFields = Object.keys(body).filter(
+        (k) => !["status", "deliveredAt", "paidTo", "deliveredDate"].includes(k)
+      );
+      if (forbiddenFields.length) {
+        return res.status(400).json({ error: "Staff can only mark order as delivered" });
+      }
+      if (body.status != null && String(body.status).toLowerCase() !== "delivered") {
+        return res.status(400).json({ error: "Staff can only set status to delivered" });
+      }
+      if (!isPartner(username)) {
+        return res.status(400).json({ error: "Invalid session user for delivery receiver" });
+      }
+      pTo = username;
+      deliveredAt = new Date();
+    } else {
+      return res.status(403).json({ error: "Forbidden" });
     }
     const order = await Order.findById(id).lean();
     if (!order) return res.status(404).json({ error: "Order not found" });
     if (order.status === "delivered") {
       return res.status(400).json({ error: "Order already delivered" });
     }
-    const deliveredAt = new Date(`${dateText}T12:00:00.000Z`);
     await Order.findByIdAndUpdate(id, {
       status: "delivered",
       deliveredBy: null,

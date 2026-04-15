@@ -24,8 +24,11 @@ export const canViewBalance = isAdminOrStaff;
 export const canViewOrders = isAdminOrStaff;
 export const canCreateOrder = isAdminOrStaff;
 
-/** Mark delivered, edit order, delete order — admin only (matches PATCH/POST deliver/DELETE). */
+/** Full order mutation powers: edit/delete stay admin-only. */
 export const canAdminMutateOrders = isAdmin;
+
+/** Mark delivered is allowed for admin and staff. */
+export const canMarkOrderDelivered = isAdminOrStaff;
 
 export const canViewExpenses = isAdminOrStaff;
 export const canCreateExpense = isAdminOrStaff;
