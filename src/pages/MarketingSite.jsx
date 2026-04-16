@@ -6,6 +6,7 @@ import {
   WhatsAppIcon,
 } from "../components/Icons.jsx";
 import HomepageSlider from "../components/HomepageSlider.jsx";
+import WhySlider from "../components/WhySlider.jsx";
 import { Link } from "react-router-dom";
 import pawganicLogo from "../../imgs/PawganicLogo.jpg";
 import ingredientsImage from "../../imgs/Ingredients/ing01.jpeg";
@@ -250,30 +251,60 @@ function Benefits() {
   return (
     <section id="benefits" className="py-14 sm:py-20">
       <Container>
-        <Reveal>
-          <SectionHeading
-            eyebrow="Why Pawganic"
-            title="Good food is the foundation of a great life."
-            description="Pawganic is built around simple, organic-minded recipes that prioritize digestion, skin & coat health, and feel-good energy."
-          />
-        </Reveal>
+        <div className="grid items-start gap-10 lg:grid-cols-12 lg:gap-12">
+          <div className="min-w-0 lg:col-span-7">
+            <Reveal>
+              <SectionHeading
+                eyebrow="Why Pawganic"
+                title="Good food is the foundation of a great life."
+                description="Pawganic is built around simple, organic-minded recipes that prioritize digestion, skin & coat health, and feel-good energy."
+              />
+            </Reveal>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-3">
-          {benefits.map((b, i) => (
-            <Reveal key={b.title} delayMs={80 + i * 80}>
-              <div className="h-full rounded-3xl border border-forest/10 bg-white p-6 shadow-soft">
-                <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-forest/10 text-forest">
-                  <PawIcon className="h-6 w-6" />
-                </div>
-                <h3 className="mt-5 font-serif text-xl text-slate-900">
-                  {b.title}
-                </h3>
-                <p className="mt-3 text-sm leading-relaxed text-slate-700">
-                  {b.text}
-                </p>
+            <Reveal delayMs={80}>
+              <div className="mx-auto mt-8 w-full max-w-[90%] sm:max-w-[520px] lg:hidden">
+                <WhySlider />
               </div>
             </Reveal>
-          ))}
+
+            <div className="mt-8 grid gap-5 sm:grid-cols-2">
+              {benefits.slice(0, 2).map((b, i) => (
+                <Reveal key={b.title} delayMs={120 + i * 80}>
+                  <div className="h-full rounded-3xl border border-forest/10 bg-white p-6 shadow-soft">
+                    <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-forest/10 text-forest">
+                      <PawIcon className="h-6 w-6" />
+                    </div>
+                    <h3 className="mt-5 font-serif text-xl text-slate-900">
+                      {b.title}
+                    </h3>
+                    <p className="mt-3 text-sm leading-relaxed text-slate-700">
+                      {b.text}
+                    </p>
+                  </div>
+                </Reveal>
+              ))}
+
+              <Reveal delayMs={280}>
+                <div className="sm:col-span-2 rounded-3xl border border-forest/10 bg-white p-6 shadow-soft">
+                  <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-forest/10 text-forest">
+                    <PawIcon className="h-6 w-6" />
+                  </div>
+                  <h3 className="mt-5 font-serif text-xl text-slate-900">
+                    {benefits[2].title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-700">
+                    {benefits[2].text}
+                  </p>
+                </div>
+              </Reveal>
+            </div>
+          </div>
+
+          <Reveal delayMs={120}>
+            <div className="hidden w-full lg:col-span-5 lg:block lg:self-start lg:justify-self-end">
+              <WhySlider />
+            </div>
+          </Reveal>
         </div>
       </Container>
     </section>
