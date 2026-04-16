@@ -5,8 +5,10 @@ import {
   PawIcon,
   WhatsAppIcon,
 } from "../components/Icons.jsx";
+import HomepageSlider from "../components/HomepageSlider.jsx";
 import { Link } from "react-router-dom";
 import pawganicLogo from "../../imgs/PawganicLogo.jpg";
+import ingredientsImage from "../../imgs/Ingredients/ing01.jpeg";
 
 const WHATSAPP_NUMBER = "96181243040";
 const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}`;
@@ -279,20 +281,27 @@ function Benefits() {
 }
 
 function Ingredients() {
-  const items = [
+  const groups = [
     {
-      name: "Fresh Spinach",
-      note: "Antioxidants + iron for everyday vitality.",
+      title: "Protein sources",
+      items: ["Meat", "Chicken", "Fish"],
       accent: "bg-forest/10 text-forest",
     },
     {
-      name: "Carrots",
-      note: "A natural source of beta-carotene and fiber.",
+      title: "Vegetables & carbs",
+      items: [
+        "Carrots",
+        "Zucchini",
+        "Green peas",
+        "Sweet potatoes",
+        "Potatoes",
+        "Rice",
+      ],
       accent: "bg-carrot/15 text-carrot",
     },
     {
-      name: "Omega-3 Oils",
-      note: "Supports joints, skin, and a shiny coat.",
+      title: "Supplements",
+      items: ["Omega-3 oil"],
       accent: "bg-forest/10 text-forest",
     },
   ];
@@ -300,51 +309,81 @@ function Ingredients() {
   return (
     <section id="ingredients" className="py-14 sm:py-20">
       <Container>
-        <div className="grid items-start gap-10 lg:grid-cols-2">
-          <Reveal>
-            <SectionHeading
-              eyebrow="Ingredients"
-              title="Real food, beautifully simple."
-              description="A clean, visual approach—fresh greens, vibrant veggies, and essential oils to support your dog from the inside out."
-            />
+        <div className="grid items-start gap-10 lg:grid-cols-12 lg:gap-12">
+          <div className="lg:col-span-7">
+            <Reveal>
+              <SectionHeading
+                eyebrow="Ingredients"
+                title="Real ingredients, real nutrition."
+                description="A balanced mix of high-quality proteins and fresh vegetables, carefully prepared to support your dog’s health, energy, and wellbeing."
+              />
 
-            <div className="mt-7 flex flex-wrap gap-2">
-              <span className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-soft">
-                No preservatives
-              </span>
-              <span className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-soft">
-                No fillers
-              </span>
-              <span className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-soft">
-                Gentle cooking
-              </span>
+              <div className="mt-7 flex flex-wrap gap-2">
+                <span className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-soft">
+                  No preservatives
+                </span>
+                <span className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-soft">
+                  No fillers
+                </span>
+                <span className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-soft">
+                  Gentle cooking
+                </span>
+              </div>
+            </Reveal>
+
+            <Reveal delayMs={80}>
+              <div className="mx-auto mt-7 w-full max-w-[90%] overflow-hidden rounded-3xl border border-forest/10 bg-white p-3 shadow-soft sm:max-w-[440px] lg:hidden">
+                <div className="aspect-square overflow-hidden rounded-2xl bg-cream">
+                  <img
+                    src={ingredientsImage}
+                    alt="Fresh Pawganic ingredients"
+                    className="h-full w-full object-cover object-center"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+            </Reveal>
+
+            <div className="mt-7 grid gap-4 sm:grid-cols-2">
+              {groups.map((group, i) => (
+                <Reveal key={group.title} delayMs={140 + i * 80}>
+                  <div className="rounded-3xl border border-forest/10 bg-white p-6 shadow-soft">
+                    <div className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${group.accent}`}>
+                      Key ingredient
+                    </div>
+                    <div className="mt-4">
+                      <div className="font-serif text-2xl text-slate-900">
+                        {group.title}
+                      </div>
+                      <ul className="mt-3 space-y-1.5 text-sm leading-relaxed text-slate-700">
+                        {group.items.map((item) => (
+                          <li key={item} className="flex items-start gap-2">
+                            <span className="mt-2 h-1.5 w-1.5 rounded-full bg-forest/70" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+
+          <Reveal delayMs={80}>
+            <div className="hidden w-full lg:col-span-5 lg:block lg:self-start lg:justify-self-end">
+              <div className="w-full max-w-[420px] overflow-hidden rounded-3xl border border-forest/10 bg-white p-3 shadow-soft">
+                <div className="aspect-square overflow-hidden rounded-2xl bg-cream">
+                  <img
+                    src={ingredientsImage}
+                    alt="Fresh Pawganic ingredients"
+                    className="h-full w-full object-cover object-center"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
             </div>
           </Reveal>
-
-          <div className="grid gap-4">
-            {items.map((it, i) => (
-              <Reveal key={it.name} delayMs={80 + i * 80}>
-                <div className="rounded-3xl border border-forest/10 bg-white p-6 shadow-soft">
-                  <div className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${it.accent}`}>
-                    Key ingredient
-                  </div>
-                  <div className="mt-4 flex items-start justify-between gap-4">
-                    <div>
-                      <div className="font-serif text-2xl text-slate-900">
-                        {it.name}
-                      </div>
-                      <p className="mt-2 text-sm leading-relaxed text-slate-700">
-                        {it.note}
-                      </p>
-                    </div>
-                    <div className="hidden sm:block">
-                      <div className="h-12 w-12 rounded-2xl bg-cream ring-1 ring-forest/10" />
-                    </div>
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
         </div>
       </Container>
     </section>
@@ -449,6 +488,7 @@ export default function MarketingSite() {
     <div id="top" className="min-h-screen bg-cream">
       <Nav />
       <main>
+        <HomepageSlider />
         <Hero />
         <Benefits />
         <Ingredients />
