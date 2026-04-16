@@ -375,29 +375,52 @@ function Ingredients() {
               </div>
             </Reveal>
 
-            <div className="mt-7 grid gap-4 sm:grid-cols-2">
-              {groups.map((group, i) => (
-                <Reveal key={group.title} delayMs={140 + i * 80}>
-                  <div className="rounded-3xl border border-forest/10 bg-white p-6 shadow-soft">
-                    <div className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${group.accent}`}>
-                      Key ingredient
-                    </div>
-                    <div className="mt-4">
-                      <div className="font-serif text-2xl text-slate-900">
-                        {group.title}
+            <div className="mt-7 grid gap-4 sm:grid-cols-2 sm:items-start">
+              <div className="grid gap-4">
+                {[groups[0], groups[2]].map((group, i) => (
+                  <Reveal key={group.title} delayMs={140 + i * 80}>
+                    <div className="rounded-3xl border border-forest/10 bg-white p-6 shadow-soft">
+                      <div className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${group.accent}`}>
+                        Key ingredient
                       </div>
-                      <ul className="mt-3 space-y-1.5 text-sm leading-relaxed text-slate-700">
-                        {group.items.map((item) => (
-                          <li key={item} className="flex items-start gap-2">
-                            <span className="mt-2 h-1.5 w-1.5 rounded-full bg-forest/70" />
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
+                      <div className="mt-4">
+                        <div className="font-serif text-2xl text-slate-900">
+                          {group.title}
+                        </div>
+                        <ul className="mt-3 space-y-1.5 text-sm leading-relaxed text-slate-700">
+                          {group.items.map((item) => (
+                            <li key={item} className="flex items-start gap-2">
+                              <span className="mt-2 h-1.5 w-1.5 rounded-full bg-forest/70" />
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
+                  </Reveal>
+                ))}
+              </div>
+
+              <Reveal delayMs={300}>
+                <div className="rounded-3xl border border-forest/10 bg-white p-6 shadow-soft">
+                  <div className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${groups[1].accent}`}>
+                    Key ingredient
                   </div>
-                </Reveal>
-              ))}
+                  <div className="mt-4">
+                    <div className="font-serif text-2xl text-slate-900">
+                      {groups[1].title}
+                    </div>
+                    <ul className="mt-3 space-y-1.5 text-sm leading-relaxed text-slate-700">
+                      {groups[1].items.map((item) => (
+                        <li key={item} className="flex items-start gap-2">
+                          <span className="mt-2 h-1.5 w-1.5 rounded-full bg-forest/70" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </Reveal>
             </div>
           </div>
 
