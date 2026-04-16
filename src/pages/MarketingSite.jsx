@@ -194,9 +194,9 @@ function Hero() {
 
                   <div className="mt-6 grid gap-4 sm:grid-cols-2">
                     {[
-                      { name: "Fresh Chicken", note: "Lean protein" },
+                      { name: "Fresh Meat", note: "Lean protein" },
                       { name: "Carrots", note: "Vitamin A boost" },
-                      { name: "Spinach", note: "Iron + antioxidants" },
+                      { name: "Sweet Potatoes", note: "Fiber + natural energy" },
                       { name: "Omega-3 Oils", note: "Coat + joints" },
                     ].map((item) => (
                       <div
