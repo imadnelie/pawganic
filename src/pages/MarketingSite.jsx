@@ -309,8 +309,8 @@ function Ingredients() {
   return (
     <section id="ingredients" className="py-14 sm:py-20">
       <Container>
-        <div className="grid items-start gap-10 lg:grid-cols-12 lg:gap-12">
-          <div className="lg:col-span-7">
+        <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:gap-12">
+          <div className="min-w-0">
             <Reveal>
               <SectionHeading
                 eyebrow="Ingredients"
@@ -371,7 +371,7 @@ function Ingredients() {
           </div>
 
           <Reveal delayMs={80}>
-            <div className="hidden w-full lg:col-span-5 lg:block lg:self-start lg:justify-self-end">
+            <div className="hidden w-full lg:block lg:self-start lg:justify-self-end">
               <div className="w-full max-w-[420px] overflow-hidden rounded-3xl border border-forest/10 bg-white p-3 shadow-soft">
                 <div className="aspect-square overflow-hidden rounded-2xl bg-cream">
                   <img
