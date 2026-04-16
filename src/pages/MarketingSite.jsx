@@ -251,8 +251,8 @@ function Benefits() {
   return (
     <section id="benefits" className="py-14 sm:py-20">
       <Container>
-        <div className="grid items-start gap-10 lg:grid-cols-12 lg:gap-12">
-          <div className="min-w-0 lg:col-span-7">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-stretch lg:gap-12">
+          <div className="min-w-0">
             <Reveal>
               <SectionHeading
                 eyebrow="Why Pawganic"
@@ -301,8 +301,8 @@ function Benefits() {
           </div>
 
           <Reveal delayMs={120}>
-            <div className="hidden w-full lg:col-span-5 lg:block lg:self-start lg:justify-self-end">
-              <WhySlider />
+            <div className="hidden w-full lg:block lg:self-stretch">
+              <WhySlider fill />
             </div>
           </Reveal>
         </div>

@@ -15,7 +15,7 @@ const slides = [
   { src: why04, alt: "Healthy meals supporting visible results" },
 ];
 
-export default function WhySlider() {
+export default function WhySlider({ fill = false }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const resumeTimeoutRef = useRef(null);
@@ -55,12 +55,18 @@ export default function WhySlider() {
 
   return (
     <div
-      className="group relative overflow-hidden rounded-3xl border border-forest/10 bg-white shadow-soft"
+      className={`group relative overflow-hidden rounded-3xl border border-forest/10 bg-white shadow-soft ${
+        fill ? "h-full" : ""
+      }`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={pauseTemporarily}
     >
-      <div className="relative aspect-square w-full overflow-hidden bg-cream">
+      <div
+        className={`relative w-full overflow-hidden bg-cream ${
+          fill ? "h-full min-h-full" : "aspect-square"
+        }`}
+      >
         <div
           className="flex h-full w-full transition-transform duration-700 ease-out"
           style={slideOffset}
@@ -70,7 +76,7 @@ export default function WhySlider() {
               <img
                 src={slide.src}
                 alt={slide.alt}
-                className="h-full w-full object-contain object-center"
+                className="h-full w-full object-cover object-center"
                 loading="lazy"
               />
             </div>
