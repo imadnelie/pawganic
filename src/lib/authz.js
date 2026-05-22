@@ -37,6 +37,15 @@ export const canDeleteExpense = isAdmin;
 
 export const canAccessUsersPage = isAdmin;
 
+/** Inventory module: staff can view, add purchases, create batches, view reports — not edit/delete purchases or batches. */
+export const canViewInventoryModule = isAdminOrStaff;
+export const canCreatePurchase = isAdminOrStaff;
+export const canEditPurchase = isAdmin;
+export const canDeletePurchase = isAdmin;
+export const canCreateBatch = isAdminOrStaff;
+export const canDeleteBatch = isAdmin;
+export const canViewInventoryReports = isAdminOrStaff;
+
 export function postLoginDestination(user, fromPathname) {
   if (!isAdminOrStaff(user)) {
     return fromPathname && !String(fromPathname).startsWith("/admin") ? fromPathname : "/";

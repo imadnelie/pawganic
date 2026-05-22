@@ -189,37 +189,51 @@ export default function Expenses() {
                 </td>
               </tr>
             ) : (
-              rows.map((e) => (
-                <tr key={e.id} className="hover:bg-slate-50">
-                  <td className="px-4 py-3 text-slate-600">{e.date}</td>
-                  <td className="px-4 py-3 font-medium text-slate-900">{e.description}</td>
-                  <td className="px-4 py-3 text-slate-600">{money(e.amount)}</td>
-                  <td className="px-4 py-3 capitalize text-slate-600">{e.paidBy}</td>
-                  {showExpenseRowActions ? (
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex flex-wrap items-center justify-end gap-3">
-                        <button
-                          type="button"
-                          onClick={() => openEdit(e)}
-                          className="text-sm font-semibold text-forest hover:underline"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setErr("");
-                            setDeleteTarget(e);
-                          }}
-                          className="text-sm font-semibold text-rose-700 hover:underline"
-                        >
-                          Delete
-                        </button>
-                      </div>
+              rows.map((e) => {
+                const linkedPurchase = e.sourceType === "purchase";
+                return (
+                  <tr key={e.id} className="hover:bg-slate-50">
+                    <td className="px-4 py-3 text-slate-600">{e.date}</td>
+                    <td className="px-4 py-3 font-medium text-slate-900">
+                      <div>{e.description}</div>
+                      {linkedPurchase ? (
+                        <span className="mt-1 inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                          Linked purchase
+                        </span>
+                      ) : null}
                     </td>
-                  ) : null}
-                </tr>
-              ))
+                    <td className="px-4 py-3 text-slate-600">{money(e.amount)}</td>
+                    <td className="px-4 py-3 capitalize text-slate-600">{e.paidBy}</td>
+                    {showExpenseRowActions ? (
+                      <td className="px-4 py-3 text-right">
+                        {linkedPurchase ? (
+                          <span className="text-xs text-slate-400">Edit in Purchases</span>
+                        ) : (
+                          <div className="flex flex-wrap items-center justify-end gap-3">
+                            <button
+                              type="button"
+                              onClick={() => openEdit(e)}
+                              className="text-sm font-semibold text-forest hover:underline"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setErr("");
+                                setDeleteTarget(e);
+                              }}
+                              className="text-sm font-semibold text-rose-700 hover:underline"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    ) : null}
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

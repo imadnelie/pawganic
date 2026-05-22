@@ -14,7 +14,13 @@ function toExpenseJson(e) {
     description: e.description,
     amount: e.amount,
     paidBy: e.paid_by,
+    sourceType: e.sourceType ?? null,
+    sourceId: e.sourceId != null ? String(e.sourceId) : null,
   };
+}
+
+function isPurchaseLinkedExpense(e) {
+  return e?.sourceType === "purchase" && e?.sourceId != null;
 }
 
 r.get("/", requireAdminOrUser, async (req, res) => {
@@ -58,6 +64,11 @@ r.put("/:id", requireAdmin, async (req, res) => {
     if (!existing) {
       return res.status(404).json({ error: "Expense not found" });
     }
+    if (isPurchaseLinkedExpense(existing)) {
+      return res.status(400).json({
+        error: "This expense is linked to a purchase. Edit it from the Purchases page.",
+      });
+    }
     const { date, description, amount, paidBy } = req.body || {};
     const pBy = String(paidBy || "").toLowerCase();
     const amt = Number(amount);
@@ -85,10 +96,16 @@ r.delete("/:id", requireAdmin, async (req, res) => {
     if (!mongoose.isValidObjectId(id)) {
       return res.status(400).json({ error: "Invalid expense id" });
     }
-    const existing = await Expense.findByIdAndDelete(id);
+    const existing = await Expense.findById(id).lean();
     if (!existing) {
       return res.status(404).json({ error: "Expense not found" });
     }
+    if (isPurchaseLinkedExpense(existing)) {
+      return res.status(400).json({
+        error: "This expense is linked to a purchase. Delete the purchase instead.",
+      });
+    }
+    await Expense.findByIdAndDelete(id);
     res.status(204).send();
   } catch (e) {
     res.status(500).json({ error: e.message || "Server error" });

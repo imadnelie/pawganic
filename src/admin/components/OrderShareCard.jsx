@@ -1,5 +1,6 @@
 import pawganicLogo from "../../../imgs/PawganicLogo.jpg";
 import { getOrderBreakdown, money, normalizeShareOrder } from "../utils/orderShare.js";
+import { truncateMapsUrl } from "../utils/orderReceiptPdf.js";
 
 function niceMeal(value) {
   return String(value || "")
@@ -49,6 +50,33 @@ export default function OrderShareCard({ order, forExport = false }) {
           <div className="font-semibold capitalize">{normalizedOrder?.status || "N/A"}</div>
         </div>
       </div>
+
+      {normalizedOrder?.customerCity || normalizedOrder?.customerMapsLink ? (
+        <div className="mt-2 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
+          {normalizedOrder?.customerCity ? (
+            <div>
+              <div className="text-xs uppercase text-slate-500">City</div>
+              <div className="font-semibold">{normalizedOrder.customerCity}</div>
+            </div>
+          ) : null}
+          {normalizedOrder?.customerMapsLink ? (
+            <div className={normalizedOrder?.customerCity ? "" : "sm:col-span-2"}>
+              <div className="text-xs uppercase text-slate-500">Location</div>
+              <a
+                href={normalizedOrder.customerMapsLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-0.5 inline-block font-semibold text-blue-600 underline decoration-blue-600/30"
+              >
+                Open in Google Maps
+              </a>
+              <p className="mt-1 break-all text-xs text-slate-400">
+                {truncateMapsUrl(normalizedOrder.customerMapsLink)}
+              </p>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
         <table className="min-w-full text-sm">

@@ -2,7 +2,14 @@ import { Router } from "express";
 import mongoose from "mongoose";
 import { Order, Customer } from "../db.js";
 import { requireAuth, requireAdmin, requireAdminOrUser } from "../middleware/auth.js";
-import { isMealType, isPartner } from "../constants.js";
+import { isMealType, isPartner, mealTypeToFinishedProductType } from "../constants.js";
+import { OrderBatchAllocation } from "../inventoryModels.js";
+import {
+  consumeFinishedFifo,
+  reverseFinishedAllocations,
+  reverseOrderAllocationsForOrder,
+  roundMoney,
+} from "../services/inventoryFifo.js";
 
 const r = Router();
 r.use(requireAuth);
@@ -17,6 +24,8 @@ function docToOrder(doc) {
     customerFirstName: c?.first_name ?? "",
     customerLastName: c?.last_name ?? "",
     customerMobile: c?.mobile ?? "",
+    customerCity: c?.city ?? "",
+    customerMapsLink: c?.maps_link ?? "",
     mealType: doc.mealType,
     quantity: doc.quantity,
     businessSubtotal: Number(doc.businessSubtotal ?? doc.totalPrice ?? 0),
@@ -87,7 +96,51 @@ function withItems(docs) {
   });
 }
 
-const populateCustomer = { path: "customerId", select: "first_name last_name mobile" };
+async function enrichOrdersWithInventory(orders) {
+  if (!Array.isArray(orders) || orders.length === 0) return orders;
+  const ids = orders.map((o) => o.id).filter(Boolean);
+  const oid = ids.map((id) => new mongoose.Types.ObjectId(id));
+  const allocs = await OrderBatchAllocation.find({ orderId: { $in: oid } }).lean();
+  const byOrder = new Map();
+  for (const a of allocs) {
+    const k = String(a.orderId);
+    if (!byOrder.has(k)) {
+      byOrder.set(k, { cogs: 0, mealRevenue: 0 });
+    }
+    const row = byOrder.get(k);
+    row.cogs = roundMoney(row.cogs + Number(a.allocatedCost || 0));
+    row.mealRevenue = roundMoney(row.mealRevenue + Number(a.revenueAllocated || 0));
+  }
+  return orders.map((o) => {
+    const inv = byOrder.get(o.id);
+    if (!inv) {
+      return {
+        ...o,
+        inventory: {
+          hasAllocation: false,
+          mealRevenue: null,
+          cogs: null,
+          profit: null,
+        },
+      };
+    }
+    const profit = roundMoney(inv.mealRevenue - inv.cogs);
+    return {
+      ...o,
+      inventory: {
+        hasAllocation: true,
+        mealRevenue: inv.mealRevenue,
+        cogs: inv.cogs,
+        profit,
+      },
+    };
+  });
+}
+
+const populateCustomer = {
+  path: "customerId",
+  select: "first_name last_name mobile city maps_link",
+};
 
 r.get("/", requireAdminOrUser, async (req, res) => {
   try {
@@ -100,7 +153,8 @@ r.get("/", requireAdminOrUser, async (req, res) => {
       filter.createdBy = String(createdBy).toLowerCase();
     }
     const docs = await Order.find(filter).populate(populateCustomer).sort({ createdAt: -1 }).lean();
-    res.json(withItems(docs));
+    const shaped = withItems(docs);
+    res.json(await enrichOrdersWithInventory(shaped));
   } catch (e) {
     res.status(500).json({ error: e.message || "Server error" });
   }
@@ -116,7 +170,8 @@ r.get("/customer/:customerId", requireAdminOrUser, async (req, res) => {
       .populate(populateCustomer)
       .sort({ createdAt: -1 })
       .lean();
-    res.json(withItems(docs));
+    const shaped = withItems(docs);
+    res.json(await enrichOrdersWithInventory(shaped));
   } catch (e) {
     res.status(500).json({ error: e.message || "Server error" });
   }
@@ -144,24 +199,62 @@ r.post("/", requireAdminOrUser, async (req, res) => {
     }
     const first = items[0];
     const totalQty = items.reduce((s, i) => s + i.quantity, 0);
-    const order = await Order.create({
-      customerId: cust._id,
-      mealType: first.mealType,
-      quantity: totalQty,
-      businessSubtotal,
-      deliveryAmount,
-      totalPrice,
-      status: "pending",
-      createdBy: username,
-      items: items.map((it) => ({
-        mealType: it.mealType,
-        quantity: it.quantity,
-        pricePerUnit: it.pricePerUnit,
-        subtotal: it.subtotal,
-      })),
-    });
+
+    let order = null;
+    const allocationDocs = [];
+    try {
+      order = await Order.create({
+        customerId: cust._id,
+        mealType: first.mealType,
+        quantity: totalQty,
+        businessSubtotal,
+        deliveryAmount,
+        totalPrice,
+        status: "pending",
+        createdBy: username,
+        items: items.map((it) => ({
+          mealType: it.mealType,
+          quantity: it.quantity,
+          pricePerUnit: it.pricePerUnit,
+          subtotal: it.subtotal,
+        })),
+      });
+
+      for (let i = 0; i < order.items.length; i += 1) {
+        const it = order.items[i];
+        const pt = mealTypeToFinishedProductType(it.mealType);
+        if (!pt) {
+          throw new Error("Unsupported meal type for inventory routing");
+        }
+        const docs = await consumeFinishedFifo(null, {
+          productType: pt,
+          quantityKg: it.quantity,
+          pricePerUnit: it.pricePerUnit,
+          orderId: order._id,
+          orderItemId: it._id,
+        });
+        allocationDocs.push(...docs);
+      }
+
+      if (allocationDocs.length) {
+        await OrderBatchAllocation.insertMany(allocationDocs);
+      }
+    } catch (e) {
+      if (allocationDocs.length) {
+        await reverseFinishedAllocations(null, allocationDocs);
+      }
+      if (order?._id) {
+        await Order.deleteOne({ _id: order._id });
+      }
+      const msg = e?.message || "Server error";
+      const status = msg.includes("Insufficient finished inventory") ? 400 : 500;
+      return res.status(status).json({ error: msg });
+    }
+
     const populated = await Order.findById(order._id).populate(populateCustomer).lean();
-    res.status(201).json(withItems([populated])[0]);
+    const shaped = withItems([populated])[0];
+    const [enriched] = await enrichOrdersWithInventory([shaped]);
+    res.status(201).json(enriched);
   } catch (e) {
     res.status(500).json({ error: e.message || "Server error" });
   }
@@ -219,7 +312,9 @@ r.post("/:id/deliver", requireAdminOrUser, async (req, res) => {
       deliveredAt,
     });
     const populated = await Order.findById(id).populate(populateCustomer).lean();
-    res.json(withItems([populated])[0]);
+    const shaped = withItems([populated])[0];
+    const [enriched] = await enrichOrdersWithInventory([shaped]);
+    res.json(enriched);
   } catch (e) {
     res.status(500).json({ error: e.message || "Server error" });
   }
@@ -264,29 +359,63 @@ r.put("/:id", requireAdmin, async (req, res) => {
       deliveredAt = new Date(`${dateText}T12:00:00.000Z`);
     }
 
-    await Order.findByIdAndUpdate(id, {
-      customerId: cust._id,
-      mealType: first.mealType,
-      quantity: totalQty,
-      businessSubtotal,
-      deliveryAmount,
-      totalPrice,
-      status: s,
-      deliveredBy: null,
-      paidTo: pTo,
-      deliveredAt,
-      items: items.map((it) => ({
-        mealType: it.mealType,
-        quantity: it.quantity,
-        pricePerUnit: it.pricePerUnit,
-        subtotal: it.subtotal,
-      })),
-    });
+    await reverseOrderAllocationsForOrder(null, order._id);
+
+    const allocationDocs = [];
+    try {
+      await Order.findByIdAndUpdate(id, {
+        customerId: cust._id,
+        mealType: first.mealType,
+        quantity: totalQty,
+        businessSubtotal,
+        deliveryAmount,
+        totalPrice,
+        status: s,
+        deliveredBy: null,
+        paidTo: pTo,
+        deliveredAt,
+        items: items.map((it) => ({
+          mealType: it.mealType,
+          quantity: it.quantity,
+          pricePerUnit: it.pricePerUnit,
+          subtotal: it.subtotal,
+        })),
+      });
+
+      const updated = await Order.findById(id);
+      if (!updated) throw new Error("Order not found");
+
+      for (let i = 0; i < updated.items.length; i += 1) {
+        const it = updated.items[i];
+        const pt = mealTypeToFinishedProductType(it.mealType);
+        if (!pt) throw new Error("Unsupported meal type for inventory routing");
+        const docs = await consumeFinishedFifo(null, {
+          productType: pt,
+          quantityKg: it.quantity,
+          pricePerUnit: it.pricePerUnit,
+          orderId: updated._id,
+          orderItemId: it._id,
+        });
+        allocationDocs.push(...docs);
+      }
+      if (allocationDocs.length) {
+        await OrderBatchAllocation.insertMany(allocationDocs);
+      }
+    } catch (e) {
+      if (allocationDocs.length) {
+        await reverseFinishedAllocations(null, allocationDocs);
+      }
+      throw e;
+    }
 
     const populated = await Order.findById(id).populate(populateCustomer).lean();
-    return res.json(withItems([populated])[0]);
+    const shaped = withItems([populated])[0];
+    const [enriched] = await enrichOrdersWithInventory([shaped]);
+    return res.json(enriched);
   } catch (e) {
-    res.status(500).json({ error: e.message || "Server error" });
+    const msg = e?.message || "Server error";
+    const status = msg.includes("Insufficient finished inventory") ? 400 : 500;
+    res.status(status).json({ error: msg });
   }
 });
 
@@ -296,6 +425,7 @@ r.delete("/:id", requireAdmin, async (req, res) => {
     if (!mongoose.isValidObjectId(id)) {
       return res.status(400).json({ error: "Invalid order id" });
     }
+    await reverseOrderAllocationsForOrder(null, id);
     const existing = await Order.findByIdAndDelete(id);
     if (!existing) return res.status(404).json({ error: "Order not found" });
     return res.status(204).send();

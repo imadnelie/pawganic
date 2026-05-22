@@ -7,6 +7,10 @@ const STAFF_NAV = [
   { to: "/admin", label: "Dashboard", end: true },
   { to: "/admin/customers", label: "Customers" },
   { to: "/admin/orders", label: "Orders" },
+  { to: "/admin/inventory", label: "Ingredients Inventory" },
+  { to: "/admin/purchases", label: "Purchases" },
+  { to: "/admin/batches", label: "Batches" },
+  { to: "/admin/inventory-reports", label: "Reports" },
   { to: "/admin/expenses", label: "Expenses" },
   { to: "/admin/balance", label: "Balance" },
 ];
@@ -18,6 +22,10 @@ function defaultTitleForPath(pathname) {
   if (pathname === "/admin/orders") return "Orders";
   if (pathname === "/admin/expenses") return "Expenses";
   if (pathname === "/admin/balance") return "Balance";
+  if (pathname === "/admin/inventory") return "Ingredients Inventory";
+  if (pathname === "/admin/purchases") return "Purchases";
+  if (pathname === "/admin/batches") return "Batches";
+  if (pathname === "/admin/inventory-reports") return "Reports";
   if (pathname === "/admin/users") return "Users";
   return "Admin";
 }

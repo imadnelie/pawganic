@@ -6,7 +6,7 @@ import { canMarkOrderDelivered, isAdmin } from "../../lib/authz.js";
 import Modal from "../components/Modal.jsx";
 import OrderShareModal from "../components/OrderShareModal.jsx";
 import StatusBadge from "../components/StatusBadge.jsx";
-import { normalizeShareOrder } from "../utils/orderShare.js";
+import { enrichShareOrder, normalizeShareOrder } from "../utils/orderShare.js";
 
 function money(n) {
   return new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(n);
@@ -103,13 +103,8 @@ export default function Orders() {
     `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`)
   );
 
-  const enrichOrderForShare = (order) => {
-    const match = customers.find((c) => String(c.id) === String(order?.customerId));
-    return normalizeShareOrder({
-      ...order,
-      customerMobile: order?.customerMobile || match?.mobile || "",
-    });
-  };
+  const enrichOrderForShare = (order) =>
+    normalizeShareOrder(enrichShareOrder(order, customers));
 
   const submitDeliver = async (e) => {
     e.preventDefault();
@@ -204,6 +199,11 @@ export default function Orders() {
         </button>
       </div>
 
+      <p className="mt-4 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+        Order quantities are <strong>kg</strong> of finished product. New orders require enough finished inventory from
+        production batches (FIFO).
+      </p>
+
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <div>
           <label className="text-xs text-slate-500">Status</label>
@@ -244,8 +244,14 @@ export default function Orders() {
             <tr>
               <th className="whitespace-nowrap px-3 py-3 text-left font-semibold text-slate-700">Customer</th>
               <th className="whitespace-nowrap px-3 py-3 text-left font-semibold text-slate-700">Meal</th>
-              <th className="whitespace-nowrap px-3 py-3 text-left font-semibold text-slate-700">Items</th>
+              <th className="whitespace-nowrap px-3 py-3 text-left font-semibold text-slate-700">Items (kg)</th>
               <th className="whitespace-nowrap px-3 py-3 text-left font-semibold text-slate-700">Total</th>
+              <th className="hidden xl:table-cell whitespace-nowrap px-3 py-3 text-left font-semibold text-slate-700">
+                COGS
+              </th>
+              <th className="hidden xl:table-cell whitespace-nowrap px-3 py-3 text-left font-semibold text-slate-700">
+                Profit
+              </th>
               <th className="whitespace-nowrap px-3 py-3 text-left font-semibold text-slate-700">Status</th>
               <th className="whitespace-nowrap px-3 py-3 text-left font-semibold text-slate-700">Created by</th>
               <th className="whitespace-nowrap px-3 py-3 text-left font-semibold text-slate-700">Paid to</th>
@@ -256,13 +262,13 @@ export default function Orders() {
           <tbody className="divide-y divide-slate-100">
             {loading ? (
               <tr>
-                <td colSpan={9} className="px-3 py-8 text-center text-slate-500">
+                <td colSpan={11} className="px-3 py-8 text-center text-slate-500">
                   Loading…
                 </td>
               </tr>
             ) : orders.length === 0 ? (
               <tr>
-                <td colSpan={9} className="px-3 py-8 text-center text-slate-500">
+                <td colSpan={11} className="px-3 py-8 text-center text-slate-500">
                   No orders match filters.
                 </td>
               </tr>
@@ -282,6 +288,12 @@ export default function Orders() {
                     <div className="text-xs">Subtotal: {money(o.businessSubtotal ?? o.totalPrice ?? 0)}</div>
                     <div className="text-xs">Delivery: {money(o.deliveryAmount || 0)}</div>
                     <div className="font-semibold">Total: {money(o.totalPrice)}</div>
+                  </td>
+                  <td className="hidden xl:table-cell px-3 py-3 text-xs tabular-nums text-slate-600">
+                    {o.inventory?.hasAllocation ? money(o.inventory.cogs) : "—"}
+                  </td>
+                  <td className="hidden xl:table-cell px-3 py-3 text-xs font-medium tabular-nums text-emerald-800">
+                    {o.inventory?.hasAllocation ? money(o.inventory.profit) : "—"}
                   </td>
                   <td className="px-3 py-3">
                     <StatusBadge status={o.status} />
@@ -384,7 +396,7 @@ export default function Orders() {
             </select>
           </div>
           <div>
-            <label className="text-xs font-medium text-slate-600">Order items</label>
+            <label className="text-xs font-medium text-slate-600">Order items (qty = kg)</label>
             <div className="mt-2 space-y-2 rounded-lg border border-slate-200 p-3">
               {newForm.items.map((it, idx) => (
                 <div key={idx} className="grid grid-cols-[1.4fr_.8fr_.9fr_auto] gap-2">
@@ -407,7 +419,9 @@ export default function Orders() {
                   </select>
                   <input
                     type="number"
-                    min={1}
+                    min={0}
+                    step="any"
+                    title="kg"
                     className="block w-full rounded-lg border-slate-300 text-sm"
                     value={it.quantity}
                     onChange={(e) =>
@@ -479,7 +493,12 @@ export default function Orders() {
           </div>
         </form>
       </Modal>
-      <OrderShareModal open={!!shareModal} order={shareModal} onClose={() => setShareModal(null)} />
+      <OrderShareModal
+        open={!!shareModal}
+        order={shareModal}
+        customers={customers}
+        onClose={() => setShareModal(null)}
+      />
 
       <Modal
         open={!!deliverModal}
@@ -624,7 +643,7 @@ export default function Orders() {
             </div>
           </div>
           <div>
-            <label className="text-xs font-medium text-slate-600">Order items</label>
+            <label className="text-xs font-medium text-slate-600">Order items (qty = kg)</label>
             <div className="mt-2 space-y-2 rounded-lg border border-slate-200 p-3">
               {editForm.items.map((it, idx) => (
                 <div key={idx} className="grid grid-cols-[1.4fr_.8fr_.9fr_auto] gap-2">
@@ -647,7 +666,9 @@ export default function Orders() {
                   </select>
                   <input
                     type="number"
-                    min={1}
+                    min={0}
+                    step="any"
+                    title="kg"
                     className="block w-full rounded-lg border-slate-300 text-sm"
                     value={it.quantity}
                     onChange={(e) =>

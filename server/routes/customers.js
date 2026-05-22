@@ -2,6 +2,11 @@ import { Router } from "express";
 import mongoose from "mongoose";
 import { Customer, Order } from "../db.js";
 import { requireAuth, requireAdmin, requireAdminOrUser } from "../middleware/auth.js";
+import {
+  optionalString,
+  extractCoordsFromMapsLink,
+  resolveCustomerCoords,
+} from "../utils/mapsLink.js";
 
 const r = Router();
 r.use(requireAuth);
@@ -12,6 +17,8 @@ function toCustomerRow(c) {
     first_name: c.first_name,
     last_name: c.last_name,
     mobile: c.mobile,
+    city: c.city ?? null,
+    maps_link: c.maps_link ?? null,
     lat: c.lat,
     lng: c.lng,
     created_at:
@@ -51,16 +58,7 @@ r.get("/:id", requireAdminOrUser, async (req, res) => {
     }
     const row = await Customer.findById(id).lean();
     if (!row) return res.status(404).json({ error: "Customer not found" });
-    res.json({
-      id: String(row._id),
-      first_name: row.first_name,
-      last_name: row.last_name,
-      mobile: row.mobile,
-      lat: row.lat,
-      lng: row.lng,
-      created_at:
-        row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
-    });
+    res.json(toCustomerRow(row));
   } catch (e) {
     res.status(500).json({ error: e.message || "Server error" });
   }
@@ -68,30 +66,22 @@ r.get("/:id", requireAdminOrUser, async (req, res) => {
 
 r.post("/", requireAdminOrUser, async (req, res) => {
   try {
-    const { firstName, lastName, mobile, lat, lng } = req.body || {};
+    const { firstName, lastName, mobile, city, maps_link, lat, lng } = req.body || {};
     if (!firstName || !lastName || !mobile) {
       return res.status(400).json({ error: "firstName, lastName, and mobile are required" });
     }
-    const latN = lat != null && lat !== "" ? Number(lat) : null;
-    const lngN = lng != null && lng !== "" ? Number(lng) : null;
+    const mapsLinkStr = optionalString(maps_link);
+    const { lat: latN, lng: lngN } = resolveCustomerCoords({ lat, lng, maps_link: mapsLinkStr });
     const created = await Customer.create({
       first_name: String(firstName).trim(),
       last_name: String(lastName).trim(),
       mobile: String(mobile).trim(),
-      lat: Number.isFinite(latN) ? latN : null,
-      lng: Number.isFinite(lngN) ? lngN : null,
+      city: optionalString(city),
+      maps_link: mapsLinkStr,
+      lat: latN,
+      lng: lngN,
     });
-    const row = created.toObject();
-    res.status(201).json({
-      id: String(row._id),
-      first_name: row.first_name,
-      last_name: row.last_name,
-      mobile: row.mobile,
-      lat: row.lat,
-      lng: row.lng,
-      created_at:
-        row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
-    });
+    res.status(201).json(toCustomerRow(created.toObject()));
   } catch (e) {
     res.status(500).json({ error: e.message || "Server error" });
   }
@@ -105,36 +95,48 @@ r.patch("/:id", requireAdminOrUser, async (req, res) => {
     }
     const existing = await Customer.findById(id).lean();
     if (!existing) return res.status(404).json({ error: "Customer not found" });
-    const { firstName, lastName, mobile, lat, lng } = req.body || {};
+    const { firstName, lastName, mobile, city, maps_link, lat, lng } = req.body || {};
+
     const update = {
       first_name: firstName != null ? String(firstName).trim() : existing.first_name,
       last_name: lastName != null ? String(lastName).trim() : existing.last_name,
       mobile: mobile != null ? String(mobile).trim() : existing.mobile,
-      lat:
-        lat !== undefined
-          ? lat === "" || lat == null
-            ? null
-            : Number(lat)
-          : existing.lat,
-      lng:
-        lng !== undefined
-          ? lng === "" || lng == null
-            ? null
-            : Number(lng)
-          : existing.lng,
     };
+
+    if (city !== undefined) {
+      update.city = optionalString(city);
+    }
+
+    if (maps_link !== undefined) {
+      update.maps_link = optionalString(maps_link);
+    }
+
+    const latProvided = lat !== undefined;
+    const lngProvided = lng !== undefined;
+    if (latProvided || lngProvided) {
+      update.lat =
+        lat === "" || lat == null
+          ? null
+          : Number.isFinite(Number(lat))
+            ? Number(lat)
+            : existing.lat;
+      update.lng =
+        lng === "" || lng == null
+          ? null
+          : Number.isFinite(Number(lng))
+            ? Number(lng)
+            : existing.lng;
+    } else if (maps_link !== undefined && update.maps_link) {
+      const extracted = extractCoordsFromMapsLink(update.maps_link);
+      if (extracted) {
+        update.lat = extracted.lat;
+        update.lng = extracted.lng;
+      }
+    }
+
     await Customer.findByIdAndUpdate(id, update);
     const row = await Customer.findById(id).lean();
-    res.json({
-      id: String(row._id),
-      first_name: row.first_name,
-      last_name: row.last_name,
-      mobile: row.mobile,
-      lat: row.lat,
-      lng: row.lng,
-      created_at:
-        row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
-    });
+    res.json(toCustomerRow(row));
   } catch (e) {
     res.status(500).json({ error: e.message || "Server error" });
   }

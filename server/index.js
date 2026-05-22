@@ -12,6 +12,7 @@ import expensesRoutes from "./routes/expenses.js";
 import balanceRoutes from "./routes/balance.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import usersRoutes from "./routes/users.js";
+import inventoryRoutes from "./routes/inventory.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -36,6 +37,7 @@ app.use("/api/expenses", expensesRoutes);
 app.use("/api/balance", balanceRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/users", usersRoutes);
+app.use("/api/inventory", inventoryRoutes);
 
 app.use((err, req, res, next) => {
   console.error("[api]", req.method, req.originalUrl, err);

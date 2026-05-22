@@ -12,6 +12,41 @@ export function formatOrderDate(value) {
   return d.toLocaleString();
 }
 
+/** First non-empty trimmed string from candidates. */
+export function pickShareField(...candidates) {
+  for (const v of candidates) {
+    const s = v != null ? String(v).trim() : "";
+    if (s) return s;
+  }
+  return "";
+}
+
+function resolveShareCustomer(order, customerOrCustomers) {
+  if (!customerOrCustomers) return null;
+  if (Array.isArray(customerOrCustomers)) {
+    const id = order?.customerId != null ? String(order.customerId) : "";
+    return customerOrCustomers.find((c) => String(c.id) === id) || null;
+  }
+  return customerOrCustomers;
+}
+
+/** Merge order API fields with customer record when city/maps/mobile are missing on the order. */
+export function enrichShareOrder(order, customerOrCustomers) {
+  const base = order || {};
+  const customer = resolveShareCustomer(base, customerOrCustomers);
+  return {
+    ...base,
+    customerMobile: pickShareField(base.customerMobile, customer?.mobile),
+    customerCity: pickShareField(base.customerCity, base.customer_city, base.city, customer?.city),
+    customerMapsLink: pickShareField(
+      base.customerMapsLink,
+      base.customer_maps_link,
+      base.maps_link,
+      customer?.maps_link
+    ),
+  };
+}
+
 export function getOrderBreakdown(order) {
   const rawDelivery =
     order?.deliveryAmount ?? order?.delivery ?? order?.delivery_fee ?? order?.deliveryFee ?? 0;
@@ -45,6 +80,12 @@ export function normalizeShareOrder(order) {
     businessSubtotal: foodSubtotal,
     deliveryAmount: delivery,
     totalPrice: grandTotal,
+    customerCity: pickShareField(base.customerCity, base.customer_city, base.city),
+    customerMapsLink: pickShareField(
+      base.customerMapsLink,
+      base.customer_maps_link,
+      base.maps_link
+    ),
   };
 }
 

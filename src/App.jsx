@@ -15,6 +15,10 @@ import Orders from "./admin/pages/Orders.jsx";
 import Expenses from "./admin/pages/Expenses.jsx";
 import Balance from "./admin/pages/Balance.jsx";
 import Users from "./admin/pages/Users.jsx";
+import Inventory from "./admin/pages/Inventory.jsx";
+import Purchases from "./admin/pages/Purchases.jsx";
+import Batches from "./admin/pages/Batches.jsx";
+import InventoryReports from "./admin/pages/InventoryReports.jsx";
 
 export default function App() {
   return (
@@ -64,6 +68,38 @@ export default function App() {
               element={
                 <AdminOrStaffRoute>
                   <Balance />
+                </AdminOrStaffRoute>
+              }
+            />
+            <Route
+              path="inventory"
+              element={
+                <AdminOrStaffRoute>
+                  <Inventory />
+                </AdminOrStaffRoute>
+              }
+            />
+            <Route
+              path="purchases"
+              element={
+                <AdminOrStaffRoute>
+                  <Purchases />
+                </AdminOrStaffRoute>
+              }
+            />
+            <Route
+              path="batches"
+              element={
+                <AdminOrStaffRoute>
+                  <Batches />
+                </AdminOrStaffRoute>
+              }
+            />
+            <Route
+              path="inventory-reports"
+              element={
+                <AdminOrStaffRoute>
+                  <InventoryReports />
                 </AdminOrStaffRoute>
               }
             />

@@ -1,7 +1,13 @@
 import { useRef, useState } from "react";
 import Modal from "./Modal.jsx";
 import OrderShareCard from "./OrderShareCard.jsx";
-import { buildWhatsAppMessage, normalizeShareOrder, orderFileBaseName } from "../utils/orderShare.js";
+import { generateOrderReceiptPdf } from "../utils/orderReceiptPdf.js";
+import {
+  buildWhatsAppMessage,
+  enrichShareOrder,
+  normalizeShareOrder,
+  orderFileBaseName,
+} from "../utils/orderShare.js";
 
 function openWhatsappText(message) {
   const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
@@ -19,8 +25,8 @@ function downloadBlob(blob, filename) {
   URL.revokeObjectURL(url);
 }
 
-export default function OrderShareModal({ open, order, onClose }) {
-  const normalizedOrder = normalizeShareOrder(order);
+export default function OrderShareModal({ open, order, onClose, customers, customer }) {
+  const normalizedOrder = normalizeShareOrder(enrichShareOrder(order, customer ?? customers));
   const exportRef = useRef(null);
   const [busyAction, setBusyAction] = useState("");
   const [info, setInfo] = useState("");
@@ -67,24 +73,7 @@ export default function OrderShareModal({ open, order, onClose }) {
     setBusyAction("pdf");
     setInfo("");
     try {
-      const node = ensureExportNode();
-      const { toJpeg, jsPDF } = await loadShareLibs();
-      const jpegDataUrl = await toJpeg(node, {
-        pixelRatio: 2,
-        quality: 0.95,
-        backgroundColor: "#ffffff",
-        cacheBust: true,
-      });
-      const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const imgProps = pdf.getImageProperties(jpegDataUrl);
-      const maxWidth = pageWidth - 48;
-      const ratio = maxWidth / imgProps.width;
-      const imgWidth = maxWidth;
-      const imgHeight = imgProps.height * ratio;
-      const y = Math.max(24, (pageHeight - imgHeight) / 2);
-      pdf.addImage(jpegDataUrl, "JPEG", 24, y, imgWidth, imgHeight);
+      const pdf = await generateOrderReceiptPdf(order, { customers, customer });
       pdf.save(`${orderFileBaseName(normalizedOrder)}.pdf`);
     } catch (e) {
       setInfo(e.message || "Failed to export PDF.");

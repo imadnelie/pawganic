@@ -6,7 +6,8 @@ import { canManageCustomers } from "../../lib/authz.js";
 import StatusBadge from "../components/StatusBadge.jsx";
 import { mealLabel } from "../../lib/constants.js";
 import OrderShareModal from "../components/OrderShareModal.jsx";
-import { normalizeShareOrder } from "../utils/orderShare.js";
+import { enrichShareOrder, normalizeShareOrder } from "../utils/orderShare.js";
+import { customerHasMap, customerMapHref } from "../../lib/customerLocation.js";
 
 function money(n) {
   return new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(n);
@@ -34,14 +35,14 @@ export default function CustomerDetail() {
           api(`/orders/customer/${id}`),
         ]);
         if (cancelled) return;
-        setCustomer(c);
         setForm({
           firstName: c.first_name,
           lastName: c.last_name,
           mobile: c.mobile,
-          lat: c.lat != null ? String(c.lat) : "",
-          lng: c.lng != null ? String(c.lng) : "",
+          city: c.city || "",
+          maps_link: c.maps_link || "",
         });
+        setCustomer(c);
         setOrders(o);
       } catch (e) {
         if (!cancelled) setErr(e.message);
@@ -69,8 +70,8 @@ export default function CustomerDetail() {
           firstName: form.firstName,
           lastName: form.lastName,
           mobile: form.mobile,
-          lat: form.lat || null,
-          lng: form.lng || null,
+          city: form.city || null,
+          maps_link: form.maps_link || null,
         },
       });
       navigate("/admin/customers");
@@ -107,16 +108,23 @@ export default function CustomerDetail() {
         {customer.first_name} {customer.last_name}
       </h1>
       <p className="mt-1 text-sm text-slate-500 lg:mt-1">{customer.mobile}</p>
-      {customer.lat != null && customer.lng != null ? (
-        <a
-          href={`https://www.google.com/maps?q=${customer.lat},${customer.lng}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-2 inline-block text-sm text-forest underline"
-        >
-          Open in Google Maps
-        </a>
-      ) : null}
+      <div className="mt-2 space-y-1 text-sm text-slate-600">
+        {customer.city ? (
+          <p>
+            <span className="font-medium text-slate-700">City:</span> {customer.city}
+          </p>
+        ) : null}
+        {customerHasMap(customer) ? (
+          <a
+            href={customerMapHref(customer)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block font-medium text-forest underline"
+          >
+            Open map
+          </a>
+        ) : null}
+      </div>
 
       <div className="mt-6 grid grid-cols-1 gap-8 lg:mt-8 lg:grid-cols-2">
         <div className="min-w-0">
@@ -157,25 +165,29 @@ export default function CustomerDetail() {
                 onChange={(e) => setForm((f) => ({ ...f, mobile: e.target.value }))}
               />
             </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-2">
-              <div>
-                <label className="text-xs font-medium text-slate-600">Latitude</label>
-                <input
-                  disabled={!canEdit}
-                  className="mt-1 block min-h-[44px] w-full rounded-lg border-slate-300 text-base sm:min-h-0 sm:text-sm"
-                  value={form.lat}
-                  onChange={(e) => setForm((f) => ({ ...f, lat: e.target.value }))}
-                />
-              </div>
-              <div>
-                <label className="text-xs font-medium text-slate-600">Longitude</label>
-                <input
-                  disabled={!canEdit}
-                  className="mt-1 block min-h-[44px] w-full rounded-lg border-slate-300 text-base sm:min-h-0 sm:text-sm"
-                  value={form.lng}
-                  onChange={(e) => setForm((f) => ({ ...f, lng: e.target.value }))}
-                />
-              </div>
+            <div>
+              <label className="text-xs font-medium text-slate-600">City</label>
+              <input
+                disabled={!canEdit}
+                className="mt-1 block min-h-[44px] w-full rounded-lg border-slate-300 text-base sm:min-h-0 sm:text-sm"
+                value={form.city}
+                onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-slate-600">Google Maps Link</label>
+              <input
+                type="url"
+                inputMode="url"
+                disabled={!canEdit}
+                placeholder="https://maps.google.com/... or https://maps.app.goo.gl/..."
+                className="mt-1 block min-h-[44px] w-full rounded-lg border-slate-300 text-base sm:min-h-0 sm:text-sm"
+                value={form.maps_link}
+                onChange={(e) => setForm((f) => ({ ...f, maps_link: e.target.value }))}
+              />
+              <p className="mt-1 text-xs text-slate-500">
+                Paste a Google Maps share link. Coordinates are saved automatically when the link includes them.
+              </p>
             </div>
             {canEdit ? (
               <button
@@ -245,10 +257,7 @@ export default function CustomerDetail() {
                           type="button"
                           onClick={() =>
                             setShareModal(
-                              normalizeShareOrder({
-                                ...o,
-                                customerMobile: o.customerMobile || customer.mobile || "",
-                              })
+                              normalizeShareOrder(enrichShareOrder(o, customer))
                             )
                           }
                           className="text-xs font-semibold text-emerald-700 hover:underline"
@@ -264,7 +273,12 @@ export default function CustomerDetail() {
           </div>
         </div>
       </div>
-      <OrderShareModal open={!!shareModal} order={shareModal} onClose={() => setShareModal(null)} />
+      <OrderShareModal
+        open={!!shareModal}
+        order={shareModal}
+        customer={customer}
+        onClose={() => setShareModal(null)}
+      />
     </div>
   );
 }

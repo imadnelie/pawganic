@@ -42,6 +42,8 @@ const customerSchema = new mongoose.Schema(
     mobile: { type: String, required: true },
     lat: { type: Number, default: null },
     lng: { type: Number, default: null },
+    city: { type: String, default: null },
+    maps_link: { type: String, default: null },
     created_at: { type: Date, default: Date.now },
   },
   { timestamps: false }
@@ -53,6 +55,8 @@ const expenseSchema = new mongoose.Schema(
     description: { type: String, required: true },
     amount: { type: Number, required: true },
     paid_by: { type: String, enum: ["elie", "jimmy"], required: true },
+    sourceType: { type: String, default: null },
+    sourceId: { type: mongoose.Schema.Types.ObjectId, default: null },
   },
   { timestamps: false }
 );

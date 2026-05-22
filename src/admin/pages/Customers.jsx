@@ -4,6 +4,7 @@ import { api } from "../../api.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { canManageCustomers, isAdmin } from "../../lib/authz.js";
 import Modal from "../components/Modal.jsx";
+import { customerHasMap, customerMapHref } from "../../lib/customerLocation.js";
 
 export default function Customers() {
   const { user } = useAuth();
@@ -16,8 +17,8 @@ export default function Customers() {
     firstName: "",
     lastName: "",
     mobile: "",
-    lat: "",
-    lng: "",
+    city: "",
+    maps_link: "",
   });
   const [err, setErr] = useState("");
   const [success, setSuccess] = useState("");
@@ -45,30 +46,16 @@ export default function Customers() {
           firstName: form.firstName,
           lastName: form.lastName,
           mobile: form.mobile,
-          lat: form.lat || null,
-          lng: form.lng || null,
+          city: form.city || null,
+          maps_link: form.maps_link || null,
         },
       });
       setModal(false);
-      setForm({ firstName: "", lastName: "", mobile: "", lat: "", lng: "" });
+      setForm({ firstName: "", lastName: "", mobile: "", city: "", maps_link: "" });
       await load();
     } catch (ex) {
       setErr(ex.message);
     }
-  };
-
-  const useMyLocation = () => {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setForm((f) => ({
-          ...f,
-          lat: String(pos.coords.latitude),
-          lng: String(pos.coords.longitude),
-        }));
-      },
-      () => setErr("Could not read location")
-    );
   };
 
   const deleteCustomer = async (customer) => {
@@ -108,11 +95,14 @@ export default function Customers() {
       {success ? <p className="mt-4 text-sm text-emerald-700">{success}</p> : null}
 
       <div className="mt-5 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm [-webkit-overflow-scrolling:touch] sm:mt-6">
-        <table className="min-w-[600px] w-full divide-y divide-slate-200 text-sm">
+        <table className="min-w-[680px] w-full divide-y divide-slate-200 text-sm">
           <thead className="bg-slate-50">
             <tr>
               <th className="px-3 py-3 text-left font-semibold text-slate-700 sm:px-4">Name</th>
               <th className="px-3 py-3 text-left font-semibold text-slate-700 sm:px-4">Mobile</th>
+              <th className="hidden px-3 py-3 text-left font-semibold text-slate-700 sm:table-cell sm:px-4">
+                City
+              </th>
               <th className="px-3 py-3 text-left font-semibold text-slate-700 sm:px-4">Location</th>
               <th className="px-3 py-3 text-left font-semibold text-slate-700 sm:px-4">Orders</th>
               <th className="px-3 py-3 sm:px-4" />
@@ -121,13 +111,13 @@ export default function Customers() {
           <tbody className="divide-y divide-slate-100">
             {loading ? (
               <tr>
-                <td colSpan={5} className="px-3 py-8 text-center text-slate-500 sm:px-4">
+                <td colSpan={6} className="px-3 py-8 text-center text-slate-500 sm:px-4">
                   Loading…
                 </td>
               </tr>
             ) : rows.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-3 py-8 text-center text-slate-500 sm:px-4">
+                <td colSpan={6} className="px-3 py-8 text-center text-slate-500 sm:px-4">
                   No customers yet.
                 </td>
               </tr>
@@ -138,10 +128,13 @@ export default function Customers() {
                     {c.first_name} {c.last_name}
                   </td>
                   <td className="px-3 py-3.5 text-slate-600 sm:px-4 sm:py-3">{c.mobile}</td>
+                  <td className="hidden px-3 py-3.5 text-slate-600 sm:table-cell sm:px-4 sm:py-3">
+                    {c.city || "—"}
+                  </td>
                   <td className="px-3 py-3.5 text-slate-600 sm:px-4 sm:py-3">
-                    {c.lat != null && c.lng != null ? (
+                    {customerHasMap(c) ? (
                       <a
-                        href={`https://www.google.com/maps?q=${c.lat},${c.lng}`}
+                        href={customerMapHref(c)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-forest underline decoration-forest/30"
@@ -233,30 +226,27 @@ export default function Customers() {
               onChange={(e) => setForm((f) => ({ ...f, mobile: e.target.value }))}
             />
           </div>
-          <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
-            <div className="text-xs font-medium text-slate-700">Google Maps (optional)</div>
-            <p className="mt-1 text-xs text-slate-500">Paste coordinates or use your current location.</p>
-            <div className="mt-2 grid gap-2 sm:grid-cols-2">
-              <input
-                placeholder="Latitude"
-                className="block w-full rounded-lg border-slate-300 text-sm"
-                value={form.lat}
-                onChange={(e) => setForm((f) => ({ ...f, lat: e.target.value }))}
-              />
-              <input
-                placeholder="Longitude"
-                className="block w-full rounded-lg border-slate-300 text-sm"
-                value={form.lng}
-                onChange={(e) => setForm((f) => ({ ...f, lng: e.target.value }))}
-              />
-            </div>
-            <button
-              type="button"
-              onClick={useMyLocation}
-              className="mt-2 text-xs font-medium text-forest hover:underline"
-            >
-              Use my location
-            </button>
+          <div>
+            <label className="text-xs font-medium text-slate-600">City</label>
+            <input
+              className="mt-1 block w-full rounded-lg border-slate-300 text-sm"
+              value={form.city}
+              onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-slate-600">Google Maps Link</label>
+            <input
+              type="url"
+              inputMode="url"
+              placeholder="https://maps.google.com/... or https://maps.app.goo.gl/..."
+              className="mt-1 block w-full rounded-lg border-slate-300 text-sm"
+              value={form.maps_link}
+              onChange={(e) => setForm((f) => ({ ...f, maps_link: e.target.value }))}
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              Paste a Google Maps share link. Coordinates are saved automatically when the link includes them.
+            </p>
           </div>
         </form>
       </Modal>
