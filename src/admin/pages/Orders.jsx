@@ -215,6 +215,7 @@ export default function Orders() {
             <option value="">All</option>
             <option value="pending">Pending</option>
             <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
           </select>
         </div>
         <div>
@@ -639,6 +640,7 @@ export default function Orders() {
               >
                 <option value="pending">Pending</option>
                 <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
               </select>
             </div>
           </div>

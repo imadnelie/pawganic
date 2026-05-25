@@ -857,15 +857,16 @@ r.get("/reports/order-profit", requireAdminOrUser, async (req, res) => {
       const businessSubtotal = num(o.businessSubtotal);
       const delivery = num(o.deliveryAmount);
       const hasAlloc = list.length > 0;
+      const isDelivered = o.status === "delivered";
       return {
         orderId: String(o._id),
         createdAt: o.createdAt instanceof Date ? o.createdAt.toISOString() : o.createdAt,
         status: o.status,
         revenueExcludingDelivery: businessSubtotal,
         deliveryAmount: delivery,
-        inventoryCogs: hasAlloc ? cogs : null,
-        inventoryProfit: hasAlloc ? roundMoney(allocRev - cogs) : null,
-        hasInventoryAllocation: hasAlloc,
+        inventoryCogs: hasAlloc && isDelivered ? cogs : null,
+        inventoryProfit: hasAlloc && isDelivered ? roundMoney(allocRev - cogs) : null,
+        hasInventoryAllocation: hasAlloc && isDelivered,
       };
     });
     res.json(out);

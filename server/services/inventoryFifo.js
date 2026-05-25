@@ -6,6 +6,7 @@ import {
   OrderBatchAllocation,
   INVENTORY_MODEL_CONSTANTS,
 } from "../inventoryModels.js";
+import { mealTypeToFinishedProductType } from "../constants.js";
 
 const EPS = 1e-6;
 
@@ -154,6 +155,65 @@ export async function consumeFinishedFifo(session, { productType, quantityKg, pr
     );
   }
 
+  return allocationDocs;
+}
+
+export const FINISHED_INVENTORY_ORDER_ERROR = "Not enough finished inventory available for this order.";
+
+function mapFinishedInventoryError(err) {
+  const msg = String(err?.message || "");
+  if (msg.includes("Insufficient finished inventory")) {
+    return new Error(FINISHED_INVENTORY_ORDER_ERROR);
+  }
+  return err;
+}
+
+export async function orderHasAllocations(session, orderId) {
+  let q = OrderBatchAllocation.countDocuments({ orderId });
+  if (session) q = q.session(session);
+  return (await q) > 0;
+}
+
+/**
+ * FIFO allocate finished goods for an order. Skips if allocations already exist (legacy orders).
+ * Persists OrderBatchAllocation rows.
+ */
+export async function allocateOrderInventory(session, orderDoc) {
+  const orderId = orderDoc._id;
+  if (await orderHasAllocations(session, orderId)) {
+    return [];
+  }
+  const items = orderDoc.items || [];
+  if (!items.length) {
+    throw new Error("Order has no items");
+  }
+
+  const allocationDocs = [];
+  try {
+    for (let i = 0; i < items.length; i += 1) {
+      const it = items[i];
+      const pt = mealTypeToFinishedProductType(it.mealType);
+      if (!pt) {
+        throw new Error("Unsupported meal type for inventory routing");
+      }
+      const docs = await consumeFinishedFifo(session, {
+        productType: pt,
+        quantityKg: it.quantity,
+        pricePerUnit: it.pricePerUnit,
+        orderId,
+        orderItemId: it._id,
+      });
+      allocationDocs.push(...docs);
+    }
+    if (allocationDocs.length) {
+      await OrderBatchAllocation.insertMany(allocationDocs, session ? { session } : {});
+    }
+  } catch (e) {
+    if (allocationDocs.length) {
+      await reverseFinishedAllocations(session, allocationDocs);
+    }
+    throw mapFinishedInventoryError(e);
+  }
   return allocationDocs;
 }
 

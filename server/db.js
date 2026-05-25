@@ -21,7 +21,7 @@ const orderSchema = new mongoose.Schema(
     businessSubtotal: { type: Number, required: true },
     deliveryAmount: { type: Number, default: 0 },
     totalPrice: { type: Number, required: true },
-    status: { type: String, enum: ["pending", "delivered"], default: "pending" },
+    status: { type: String, enum: ["pending", "delivered", "cancelled"], default: "pending" },
     createdBy: { type: String, required: true },
     deliveredBy: { type: String, default: null },
     paidTo: { type: String, default: null },

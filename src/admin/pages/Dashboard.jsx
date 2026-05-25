@@ -128,6 +128,51 @@ export default function Dashboard() {
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2">
+          <h2 className="text-sm font-semibold text-slate-900">Production vs pending demand</h2>
+          <p className="mt-1 text-xs text-slate-500">
+            Pending order quantities compared to finished stock (kg). Shortfall = still needs production.
+          </p>
+          <div className="mt-4 overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-100 text-left text-xs font-semibold uppercase text-slate-500">
+                  <th className="py-2 pr-4">Product</th>
+                  <th className="py-2 pr-4 text-right">Pending (kg)</th>
+                  <th className="py-2 pr-4 text-right">Available (kg)</th>
+                  <th className="py-2 text-right">Needs production (kg)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(data.productionDemand || []).length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="py-4 text-slate-500">
+                      No pending orders or finished stock yet.
+                    </td>
+                  </tr>
+                ) : (
+                  data.productionDemand.map((row) => (
+                    <tr key={row.productType} className="border-b border-slate-50">
+                      <td className="py-2 pr-4 capitalize text-slate-800">
+                        {row.productType.replace(/_/g, " ")}
+                      </td>
+                      <td className="py-2 pr-4 text-right tabular-nums text-slate-600">{row.pendingKg}</td>
+                      <td className="py-2 pr-4 text-right tabular-nums text-slate-600">{row.availableKg}</td>
+                      <td
+                        className={`py-2 text-right tabular-nums font-medium ${
+                          row.shortfallKg > 0 ? "text-amber-800" : "text-emerald-700"
+                        }`}
+                      >
+                        {row.shortfallKg}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-slate-900">P&amp;L snapshot</h2>
           <div className="mt-4 space-y-2 text-sm">
