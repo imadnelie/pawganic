@@ -1,7 +1,9 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Modal from "./Modal.jsx";
 import OrderShareCard from "./OrderShareCard.jsx";
 import { generateOrderReceiptPdf } from "../utils/orderReceiptPdf.js";
+import { captureNodeAsJpegBlob, resolveShareLogoSrc } from "../../lib/orderShareExport.js";
+import { shareDebug } from "../../lib/shareDebug.js";
 import {
   buildWhatsAppMessage,
   enrichShareOrder,
@@ -30,7 +32,26 @@ export default function OrderShareModal({ open, order, onClose, customers, custo
   const exportRef = useRef(null);
   const [busyAction, setBusyAction] = useState("");
   const [info, setInfo] = useState("");
+  const [exportLogoSrc, setExportLogoSrc] = useState(null);
   const isBusy = Boolean(busyAction);
+
+  useEffect(() => {
+    if (!open) {
+      setExportLogoSrc(null);
+      return;
+    }
+    let cancelled = false;
+    resolveShareLogoSrc()
+      .then((src) => {
+        if (!cancelled) setExportLogoSrc(src);
+      })
+      .catch(() => {
+        if (!cancelled) setExportLogoSrc(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, normalizedOrder?.id]);
 
   if (!open || !normalizedOrder) return null;
 
@@ -40,20 +61,14 @@ export default function OrderShareModal({ open, order, onClose, customers, custo
   };
 
   const loadShareLibs = async () => {
-    const [{ toBlob, toJpeg }, { jsPDF }] = await Promise.all([import("html-to-image"), import("jspdf")]);
-    return { toBlob, toJpeg, jsPDF };
+    const { toBlob } = await import("html-to-image");
+    return { toBlob };
   };
 
   const generateJpegBlob = async () => {
     const node = ensureExportNode();
     const { toBlob } = await loadShareLibs();
-    const blob = await toBlob(node, {
-      pixelRatio: 2,
-      backgroundColor: "#ffffff",
-      cacheBust: true,
-    });
-    if (!blob) throw new Error("Could not generate image.");
-    return blob;
+    return captureNodeAsJpegBlob(node, { toBlob });
   };
 
   const onDownloadJpg = async () => {
@@ -86,29 +101,55 @@ export default function OrderShareModal({ open, order, onClose, customers, custo
     setBusyAction("wa");
     setInfo("");
     const message = buildWhatsAppMessage(normalizedOrder);
+    shareDebug("WhatsApp message", message);
+    shareDebug("message empty?", !String(message || "").trim());
+
     try {
       const blob = await generateJpegBlob();
-      const file = new File([blob], `${orderFileBaseName(normalizedOrder)}.jpg`, { type: "image/jpeg" });
-      const canNativeShareFile =
+      const filename = `${orderFileBaseName(normalizedOrder)}.jpg`;
+      const file = new File([blob], filename, { type: "image/jpeg" });
+
+      const canShareFiles =
         typeof navigator !== "undefined" &&
         typeof navigator.share === "function" &&
         typeof navigator.canShare === "function" &&
         navigator.canShare({ files: [file] });
 
-      if (canNativeShareFile) {
-        await navigator.share({
-          title: "Pawganic Order Summary",
-          text: message,
-          files: [file],
-        });
-        return;
+      shareDebug("navigator.canShare({ files })", canShareFiles);
+
+      // Reliable text: wa.me always prefills the order summary (native file share often drops text).
+      openWhatsappText(message);
+      shareDebug("share path", "wa.me text opened");
+
+      if (canShareFiles) {
+        try {
+          await navigator.share({
+            title: "Pawganic Order Summary",
+            text: message,
+            files: [file],
+          });
+          shareDebug("share path", "wa.me + native share (files + text attempted)");
+          setInfo(
+            "WhatsApp opened with the order text. If the image did not attach, use the share sheet or attach the downloaded image."
+          );
+          return;
+        } catch (e) {
+          if (e?.name === "AbortError") {
+            setInfo("WhatsApp opened with the order text.");
+            return;
+          }
+          shareDebug("native share failed", e?.message || e);
+        }
       }
 
-      openWhatsappText(message);
-      setInfo("Direct file share is not supported on this browser. Download JPG/PDF first, then attach in WhatsApp.");
+      downloadBlob(blob, filename);
+      shareDebug("share path", "wa.me + image download");
+      setInfo("WhatsApp opened with the order text. The order image was downloaded — attach it in the chat.");
     } catch (e) {
+      shareDebug("share error", e?.message || e);
       openWhatsappText(message);
-      setInfo("Used WhatsApp text fallback. If you need attachment, download JPG or PDF first.");
+      shareDebug("share path", "wa.me only (export failed)");
+      setInfo(e?.message || "Could not generate image. WhatsApp opened with order text only.");
     } finally {
       setBusyAction("");
     }
@@ -148,12 +189,12 @@ export default function OrderShareModal({ open, order, onClose, customers, custo
           </button>
         </div>
         {info ? <p className="text-xs text-slate-600">{info}</p> : null}
-        <OrderShareCard order={normalizedOrder} />
+        <OrderShareCard order={normalizedOrder} logoSrc={exportLogoSrc || undefined} />
       </div>
 
       <div className="pointer-events-none fixed -left-[200vw] top-0 z-[-1]">
         <div ref={exportRef} style={{ width: 820, background: "#fff", padding: 12 }}>
-          <OrderShareCard order={normalizedOrder} forExport />
+          <OrderShareCard order={normalizedOrder} forExport logoSrc={exportLogoSrc || undefined} />
         </div>
       </div>
     </Modal>

@@ -1,4 +1,5 @@
-import pawganicLogo from "../../../imgs/PawganicLogo.jpg";
+import { loadPawganicLogoDataUrl } from "../../lib/pawganicLogo.js";
+import { shareDebug } from "../../lib/shareDebug.js";
 import { api } from "../../api.js";
 import {
   enrichShareOrder,
@@ -38,32 +39,20 @@ export function truncateMapsUrl(url, maxLen = 48) {
   return `${s.slice(0, maxLen - 3)}...`;
 }
 
-function loadLogoForPdf(src) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      try {
-        const canvas = document.createElement("canvas");
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-          reject(new Error("Canvas unavailable"));
-          return;
-        }
-        ctx.drawImage(img, 0, 0);
+function loadLogoForPdf() {
+  return loadPawganicLogoDataUrl().then((dataUrl) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
         resolve({
-          dataUrl: canvas.toDataURL("image/jpeg", 0.92),
+          dataUrl,
           width: img.naturalWidth,
           height: img.naturalHeight,
         });
-      } catch (e) {
-        reject(e);
-      }
-    };
-    img.onerror = () => reject(new Error("Logo failed to load"));
-    img.src = src;
+      };
+      img.onerror = () => reject(new Error("Logo failed to decode"));
+      img.src = dataUrl;
+    });
   });
 }
 
@@ -281,8 +270,10 @@ export async function generateOrderReceiptPdf(order, options = {}) {
 
   let logo = null;
   try {
-    logo = await loadLogoForPdf(pawganicLogo);
-  } catch {
+    logo = await loadLogoForPdf();
+    shareDebug("PDF logo loaded", true);
+  } catch (e) {
+    shareDebug("PDF logo failed", e?.message || e);
     logo = null;
   }
 

@@ -1,4 +1,4 @@
-import pawganicLogo from "../../../imgs/PawganicLogo.jpg";
+import { pawganicLogoUrl } from "../../lib/pawganicLogo.js";
 import { getOrderBreakdown, money, normalizeShareOrder } from "../utils/orderShare.js";
 import { truncateMapsUrl } from "../utils/orderReceiptPdf.js";
 
@@ -9,7 +9,7 @@ function niceMeal(value) {
     .join(" ");
 }
 
-export default function OrderShareCard({ order, forExport = false }) {
+export default function OrderShareCard({ order, forExport = false, logoSrc = pawganicLogoUrl }) {
   const normalizedOrder = normalizeShareOrder(order);
   const items = Array.isArray(normalizedOrder?.items) ? normalizedOrder.items : [];
   const { foodSubtotal, delivery, grandTotal } = getOrderBreakdown(normalizedOrder);
@@ -25,7 +25,12 @@ export default function OrderShareCard({ order, forExport = false }) {
           <div className="text-lg font-bold text-forest">Pawganic</div>
           <div className="text-xs text-slate-500">Order summary</div>
         </div>
-        <img src={pawganicLogo} alt="Pawganic" className="h-10 w-auto rounded-md object-contain" />
+        <img
+          src={logoSrc}
+          alt="Pawganic"
+          data-pawganic-logo
+          className="h-10 w-auto rounded-md object-contain"
+        />
       </div>
 
       <div className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
