@@ -116,7 +116,11 @@ export function buildOrderSummaryLines(order) {
 }
 
 export function buildWhatsAppMessage(order) {
-  return buildOrderSummaryLines(order).join("\n");
+  const lines = buildOrderSummaryLines(order);
+  if (typeof window !== "undefined" && window.location?.origin && order?.id) {
+    lines.push("", `Order link: ${window.location.origin}/admin/orders`);
+  }
+  return lines.join("\n");
 }
 
 export function orderFileBaseName(order) {

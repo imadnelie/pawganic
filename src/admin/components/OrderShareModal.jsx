@@ -4,17 +4,13 @@ import OrderShareCard from "./OrderShareCard.jsx";
 import { generateOrderReceiptPdf } from "../utils/orderReceiptPdf.js";
 import { captureNodeAsJpegBlob, resolveShareLogoSrc } from "../../lib/orderShareExport.js";
 import { shareDebug } from "../../lib/shareDebug.js";
+import { canShareFiles, isIosDevice, openWhatsappText, shareLog } from "../../lib/sharePlatform.js";
 import {
   buildWhatsAppMessage,
   enrichShareOrder,
   normalizeShareOrder,
   orderFileBaseName,
 } from "../utils/orderShare.js";
-
-function openWhatsappText(message) {
-  const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
-  window.open(url, "_blank", "noopener,noreferrer");
-}
 
 function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
@@ -100,56 +96,82 @@ export default function OrderShareModal({ open, order, onClose, customers, custo
   const onShareWhatsApp = async () => {
     setBusyAction("wa");
     setInfo("");
+
     const message = buildWhatsAppMessage(normalizedOrder);
+    const ios = isIosDevice();
+    const filename = `${orderFileBaseName(normalizedOrder)}.jpg`;
+
+    shareLog("isIOS", ios);
+    shareLog("generated WhatsApp text", message);
     shareDebug("WhatsApp message", message);
-    shareDebug("message empty?", !String(message || "").trim());
+
+    if (ios) {
+      shareLog("share path", "ios-download-then-wa.me");
+      if (!message.trim()) {
+        setInfo("Order text is empty — cannot open WhatsApp.");
+        setBusyAction("");
+        return;
+      }
+      try {
+        const blob = await generateJpegBlob();
+        const file = new File([blob], filename, { type: "image/jpeg" });
+        shareLog("navigator.canShare({ files })", canShareFiles(file));
+        downloadBlob(blob, filename);
+        // location.assign works after async on iOS; navigator.share(files) does not.
+        openWhatsappText(message, { ios: true });
+        setInfo("Order text sent to WhatsApp. The receipt image was downloaded — attach it manually in the chat.");
+      } catch (e) {
+        shareLog("ios share failed", e?.message || e);
+        openWhatsappText(message, { ios: true });
+        setInfo(
+          e?.message
+            ? `${e.message} WhatsApp opened with order text only.`
+            : "WhatsApp opened with the order text. Use Download JPG if you need the receipt image."
+        );
+      } finally {
+        setBusyAction("");
+      }
+      return;
+    }
 
     try {
       const blob = await generateJpegBlob();
-      const filename = `${orderFileBaseName(normalizedOrder)}.jpg`;
       const file = new File([blob], filename, { type: "image/jpeg" });
+      const canShare = canShareFiles(file);
+      shareLog("navigator.canShare({ files })", canShare);
 
-      const canShareFiles =
-        typeof navigator !== "undefined" &&
-        typeof navigator.share === "function" &&
-        typeof navigator.canShare === "function" &&
-        navigator.canShare({ files: [file] });
-
-      shareDebug("navigator.canShare({ files })", canShareFiles);
-
-      // Reliable text: wa.me always prefills the order summary (native file share often drops text).
-      openWhatsappText(message);
-      shareDebug("share path", "wa.me text opened");
-
-      if (canShareFiles) {
+      if (canShare) {
+        shareLog("share path", "native-share-files");
         try {
           await navigator.share({
             title: "Pawganic Order Summary",
             text: message,
             files: [file],
           });
-          shareDebug("share path", "wa.me + native share (files + text attempted)");
-          setInfo(
-            "WhatsApp opened with the order text. If the image did not attach, use the share sheet or attach the downloaded image."
-          );
+          setInfo("Shared via your device. Pick WhatsApp to send the image and text.");
           return;
         } catch (e) {
           if (e?.name === "AbortError") {
-            setInfo("WhatsApp opened with the order text.");
+            setInfo("Share cancelled.");
             return;
           }
-          shareDebug("native share failed", e?.message || e);
+          shareLog("native share failed", e?.message || e);
         }
       }
 
+      shareLog("share path", "wa.me-then-download");
+      if (message.trim()) {
+        openWhatsappText(message, { ios: false });
+      }
       downloadBlob(blob, filename);
-      shareDebug("share path", "wa.me + image download");
-      setInfo("WhatsApp opened with the order text. The order image was downloaded — attach it in the chat.");
+      setInfo("WhatsApp opened with the order text. The receipt image was downloaded — attach it in the chat.");
     } catch (e) {
-      shareDebug("share error", e?.message || e);
-      openWhatsappText(message);
-      shareDebug("share path", "wa.me only (export failed)");
-      setInfo(e?.message || "Could not generate image. WhatsApp opened with order text only.");
+      shareLog("share error", e?.message || e);
+      if (message.trim()) {
+        openWhatsappText(message, { ios: false });
+        shareLog("share path", "wa.me-only-after-error");
+      }
+      setInfo(e?.message || "Could not export image. WhatsApp opened with order text only.");
     } finally {
       setBusyAction("");
     }
@@ -159,8 +181,8 @@ export default function OrderShareModal({ open, order, onClose, customers, custo
     <Modal open={open} title="Share order" onClose={onClose}>
       <div className="space-y-3">
         <p className="text-xs leading-relaxed text-slate-500">
-          Share via WhatsApp. On supported mobile browsers, this tries native file sharing first. Otherwise,
-          a WhatsApp text message opens and you can attach the downloaded file manually.
+          Share via WhatsApp. On iPhone, the order text opens in WhatsApp and the receipt image downloads for
+          you to attach. On Android and desktop, your device may offer a direct share with the image.
         </p>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           <button
