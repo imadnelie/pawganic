@@ -3,6 +3,7 @@ import { shareDebug } from "../../lib/shareDebug.js";
 import { api } from "../../api.js";
 import {
   enrichShareOrder,
+  formatShareMobile,
   getOrderBreakdown,
   money,
   normalizeShareOrder,
@@ -121,7 +122,7 @@ function measureReceiptHeight(normalized, items, { foodSubtotal, delivery, grand
   if (mapsLink) h += 52;
   h += 28; // table header
   h += Math.max(items.length, 1) * 24;
-  h += 78; // totals
+  h += 96; // totals (extra spacing before grand total)
   h += CARD_PAD;
   return h;
 }
@@ -165,7 +166,14 @@ function drawReceiptContent(pdf, normalized, logo, layout) {
     y,
     colWidth
   );
-  let yRight = fieldBlock(pdf, "Mobile", normalized.customerMobile || "N/A", rightX, y, colWidth);
+  let yRight = fieldBlock(
+    pdf,
+    "Mobile",
+    formatShareMobile(normalized.customerMobile) || "N/A",
+    rightX,
+    y,
+    colWidth
+  );
   y = Math.max(yLeft, yRight) + 8;
 
   if (city) {
@@ -241,21 +249,25 @@ function drawReceiptContent(pdf, normalized, logo, layout) {
 
   const labelX = tableLeft;
   const valueX = tableLeft + tableWidth;
-  const row = (label, value, bold = false) => {
+  const totalsRow = (label, value, { bold = false, lineGap = 18 } = {}) => {
     pdf.setFont("helvetica", bold ? "bold" : "normal");
     pdf.setFontSize(bold ? 12 : 10);
     pdf.setTextColor(...(bold ? SLATE_900 : SLATE_600));
     pdf.text(label, labelX, y);
+    pdf.setFont("helvetica", bold ? "bold" : "normal");
     pdf.setTextColor(...(bold ? FOREST : SLATE_900));
     pdf.text(value, valueX, y, { align: "right" });
-    y += bold ? 20 : 16;
+    y += lineGap;
   };
 
-  row("Food subtotal", money(foodSubtotal));
-  row("Delivery", money(delivery));
+  totalsRow("Food subtotal", money(foodSubtotal), { lineGap: 20 });
+  totalsRow("Delivery", money(delivery), { lineGap: 20 });
+  y += 6;
   pdf.setDrawColor(...CARD_BORDER);
-  pdf.line(labelX, y - 4, valueX, y - 4);
-  row("Grand total", money(grandTotal), true);
+  pdf.setLineWidth(0.5);
+  pdf.line(labelX, y, valueX, y);
+  y += 16;
+  totalsRow("Grand total", money(grandTotal), { bold: true, lineGap: 22 });
 
   return y + CARD_PAD;
 }

@@ -21,6 +21,27 @@ export function pickShareField(...candidates) {
   return "";
 }
 
+/**
+ * Display/share-only mobile cleanup (does not change stored customer data).
+ * Strips markdown wrappers (* _ ~ `) and stray commas/semicolons often pasted from WhatsApp or CSV.
+ */
+export function formatShareMobile(value) {
+  if (value == null) return "";
+  let s = String(value)
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .trim();
+  if (!s) return "";
+  for (let i = 0; i < 3; i += 1) {
+    const next = s
+      .replace(/^[*_~`]+|[*_~`]+$/g, "")
+      .replace(/^[,;.\s]+|[,;.\s]+$/g, "")
+      .trim();
+    if (next === s) break;
+    s = next;
+  }
+  return s.replace(/\s+/g, " ").trim();
+}
+
 function resolveShareCustomer(order, customerOrCustomers) {
   if (!customerOrCustomers) return null;
   if (Array.isArray(customerOrCustomers)) {
@@ -36,7 +57,9 @@ export function enrichShareOrder(order, customerOrCustomers) {
   const customer = resolveShareCustomer(base, customerOrCustomers);
   return {
     ...base,
-    customerMobile: pickShareField(base.customerMobile, customer?.mobile),
+    customerMobile: formatShareMobile(
+      pickShareField(base.customerMobile, customer?.mobile)
+    ),
     customerCity: pickShareField(base.customerCity, base.customer_city, base.city, customer?.city),
     customerMapsLink: pickShareField(
       base.customerMapsLink,
@@ -80,6 +103,9 @@ export function normalizeShareOrder(order) {
     businessSubtotal: foodSubtotal,
     deliveryAmount: delivery,
     totalPrice: grandTotal,
+    customerMobile: formatShareMobile(
+      pickShareField(base.customerMobile, base.customer_mobile, base.mobile)
+    ),
     customerCity: pickShareField(base.customerCity, base.customer_city, base.city),
     customerMapsLink: pickShareField(
       base.customerMapsLink,
@@ -101,7 +127,7 @@ export function buildOrderSummaryLines(order) {
   const lines = [
     `Pawganic Order #${normalized?.id || ""}`.trim(),
     `Customer: ${normalized?.customerFirstName || ""} ${normalized?.customerLastName || ""}`.trim(),
-    `Mobile: ${normalized?.customerMobile || "N/A"}`,
+    `Mobile: ${formatShareMobile(normalized?.customerMobile) || "N/A"}`,
     `Date: ${formatOrderDate(normalized?.createdAt)}`,
     "",
     "Items:",

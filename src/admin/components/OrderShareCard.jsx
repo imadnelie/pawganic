@@ -1,5 +1,10 @@
 import { pawganicLogoUrl } from "../../lib/pawganicLogo.js";
-import { getOrderBreakdown, money, normalizeShareOrder } from "../utils/orderShare.js";
+import {
+  formatShareMobile,
+  getOrderBreakdown,
+  money,
+  normalizeShareOrder,
+} from "../utils/orderShare.js";
 import { truncateMapsUrl } from "../utils/orderReceiptPdf.js";
 
 function niceMeal(value) {
@@ -42,7 +47,9 @@ export default function OrderShareCard({ order, forExport = false, logoSrc = paw
         </div>
         <div>
           <div className="text-xs uppercase text-slate-500">Mobile</div>
-          <div className="font-semibold">{normalizedOrder?.customerMobile || "N/A"}</div>
+          <div className="font-semibold">
+            {formatShareMobile(normalizedOrder?.customerMobile) || "N/A"}
+          </div>
         </div>
         <div>
           <div className="text-xs uppercase text-slate-500">Order date</div>
@@ -116,18 +123,20 @@ export default function OrderShareCard({ order, forExport = false, logoSrc = paw
         </table>
       </div>
 
-      <div className="mt-4 space-y-1 text-sm">
-        <div className="flex items-center justify-between">
+      <div className="mt-4 space-y-2.5 text-sm">
+        <div className="flex items-center justify-between gap-4">
           <span className="text-slate-600">Food subtotal</span>
-          <span className="font-semibold">{money(foodSubtotal)}</span>
+          <span className="shrink-0 font-semibold tabular-nums">{money(foodSubtotal)}</span>
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           <span className="text-slate-600">Delivery</span>
-          <span className="font-semibold">{money(delivery)}</span>
+          <span className="shrink-0 font-semibold tabular-nums">{money(delivery)}</span>
         </div>
-        <div className="flex items-center justify-between border-t border-slate-200 pt-2 text-base">
-          <span className="font-semibold text-slate-900">Grand total</span>
-          <span className="font-bold text-forest">{money(grandTotal)}</span>
+        <div className="mt-1 border-t border-slate-200 pt-3">
+          <div className="flex items-center justify-between gap-4 text-base">
+            <span className="font-bold text-slate-900">Grand total</span>
+            <span className="shrink-0 font-bold tabular-nums text-forest">{money(grandTotal)}</span>
+          </div>
         </div>
       </div>
     </div>
