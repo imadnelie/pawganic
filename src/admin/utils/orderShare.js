@@ -115,6 +115,18 @@ export function normalizeShareOrder(order) {
   };
 }
 
+function formatMealType(value) {
+  return String(value || "")
+    .split("_")
+    .map((part) => (part ? `${part[0].toUpperCase()}${part.slice(1)}` : ""))
+    .join(" ");
+}
+
+function formatShareStatus(value) {
+  const s = String(value || "N/A").replace(/_/g, " ").trim();
+  return s || "N/A";
+}
+
 export function buildOrderSummaryLines(order) {
   const normalized = normalizeShareOrder(order);
   const items = Array.isArray(normalized?.items) ? normalized.items : [];
@@ -122,12 +134,22 @@ export function buildOrderSummaryLines(order) {
   const itemLines = items.map((it) => {
     const qty = Number(it.quantity || 0);
     const subtotal = Number(it.subtotal ?? qty * Number(it.pricePerUnit || 0));
-    return `- ${it.mealType.replaceAll("_", " ")} x${qty}: ${money(subtotal)}`;
+    return `- ${formatMealType(it.mealType)} x${qty}: ${money(subtotal)}`;
   });
+
   const lines = [
     `Pawganic Order #${normalized?.id || ""}`.trim(),
-    `Customer: ${normalized?.customerFirstName || ""} ${normalized?.customerLastName || ""}`.trim(),
+    `Customer: ${`${normalized?.customerFirstName || ""} ${normalized?.customerLastName || ""}`.trim()}`,
     `Mobile: ${formatShareMobile(normalized?.customerMobile) || "N/A"}`,
+  ];
+
+  const city = pickShareField(normalized.customerCity);
+  if (city) lines.push(`City: ${city}`);
+
+  const mapsLink = pickShareField(normalized.customerMapsLink);
+  if (mapsLink) lines.push(`Location: ${mapsLink}`);
+
+  lines.push(
     `Date: ${formatOrderDate(normalized?.createdAt)}`,
     "",
     "Items:",
@@ -136,17 +158,14 @@ export function buildOrderSummaryLines(order) {
     `Food subtotal: ${money(foodSubtotal)}`,
     `Delivery: ${money(delivery)}`,
     `Grand total: ${money(grandTotal)}`,
-    `Status: ${normalized?.status || "N/A"}`,
-  ];
+    `Status: ${formatShareStatus(normalized?.status)}`
+  );
+
   return lines;
 }
 
 export function buildWhatsAppMessage(order) {
-  const lines = buildOrderSummaryLines(order);
-  if (typeof window !== "undefined" && window.location?.origin && order?.id) {
-    lines.push("", `Order link: ${window.location.origin}/admin/orders`);
-  }
-  return lines.join("\n");
+  return buildOrderSummaryLines(order).join("\n");
 }
 
 export function orderFileBaseName(order) {

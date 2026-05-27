@@ -20,7 +20,7 @@ import {
 } from "../utils/orderShare.js";
 
 const IOS_WHATSAPP_INFO =
-  "Order text copied. WhatsApp will open now. Paste the text in the chat and attach the downloaded receipt if needed.";
+  "Order text copied. WhatsApp will open now. Paste the text in the chat. Attach the downloaded PDF receipt manually if needed.";
 
 function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
@@ -63,7 +63,13 @@ export default function OrderShareModal({ open, order, onClose, customers, custo
   if (!open || !normalizedOrder) return null;
 
   const whatsappMessage = () => buildWhatsAppMessage(normalizedOrder);
+  const pdfFilename = () => `${orderFileBaseName(normalizedOrder)}.pdf`;
   const jpgFilename = () => `${orderFileBaseName(normalizedOrder)}.jpg`;
+
+  const downloadPdfReceipt = async () => {
+    const pdf = await generateOrderReceiptPdf(order, { customers, customer });
+    pdf.save(pdfFilename());
+  };
 
   const ensureExportNode = () => {
     if (!exportRef.current) throw new Error("Order card is not ready yet. Please try again.");
@@ -99,8 +105,8 @@ export default function OrderShareModal({ open, order, onClose, customers, custo
     setBusyAction("pdf");
     setInfo("");
     try {
-      const pdf = await generateOrderReceiptPdf(order, { customers, customer });
-      pdf.save(`${orderFileBaseName(normalizedOrder)}.pdf`);
+      await downloadPdfReceipt();
+      setInfo("Receipt PDF downloaded.");
     } catch (e) {
       setInfo(e.message || "Failed to export PDF.");
     } finally {
@@ -141,7 +147,7 @@ export default function OrderShareModal({ open, order, onClose, customers, custo
     setInfo("");
 
     const message = whatsappMessage();
-    const filename = jpgFilename();
+    const filename = jpgFilename(); // Android/desktop native share only
 
     shareLog("isIOS", ios);
     shareLog("generated WhatsApp text", message);
@@ -154,12 +160,12 @@ export default function OrderShareModal({ open, order, onClose, customers, custo
     }
 
     if (ios) {
-      shareLog("share path", "ios-copy-download-whatsapp-scheme");
+      shareLog("share path", "ios-copy-download-pdf-whatsapp-scheme");
       try {
         const copied = await copyShareText(message);
         shareLog("clipboard copy ok", copied);
-        const blob = await generateJpegBlob();
-        downloadBlob(blob, filename);
+        await downloadPdfReceipt();
+        shareLog("ios receipt download", "pdf");
         setInfo(
           copied
             ? IOS_WHATSAPP_INFO
@@ -171,7 +177,7 @@ export default function OrderShareModal({ open, order, onClose, customers, custo
         const copied = await copyShareText(message);
         setInfo(
           copied
-            ? `${e?.message || "Image export failed."} Order text is copied — paste in WhatsApp and attach the JPG if you downloaded it.`
+            ? `${e?.message || "PDF download failed."} Order text is copied — paste in WhatsApp and use Download PDF below if needed.`
             : e?.message || "Share failed. Use the manual steps below."
         );
         openWhatsappOnIos(message);
@@ -225,7 +231,7 @@ export default function OrderShareModal({ open, order, onClose, customers, custo
       <div className="space-y-3">
         <p className="text-xs leading-relaxed text-slate-500">
           {ios
-            ? "On iPhone, order text is copied to your clipboard, the receipt JPG downloads, then WhatsApp opens. Paste the text in a chat and attach the image if needed."
+            ? "On iPhone, order text is copied, a PDF receipt downloads (Maps link is clickable in the PDF), then WhatsApp opens. Paste the text and attach the PDF manually — iOS cannot attach files automatically from the browser."
             : "Share via WhatsApp. On Android and desktop, your device may offer a direct share with the image."}
         </p>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -265,6 +271,14 @@ export default function OrderShareModal({ open, order, onClose, customers, custo
               className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 disabled:opacity-60"
             >
               {busyAction === "copy" ? "Copying..." : "Copy order text"}
+            </button>
+            <button
+              type="button"
+              disabled={isBusy}
+              onClick={onDownloadPdf}
+              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 disabled:opacity-60"
+            >
+              {busyAction === "pdf" ? "Generating..." : "Download PDF"}
             </button>
             <button
               type="button"
