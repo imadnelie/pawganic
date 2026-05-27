@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { api } from "../../api.js";
 import { useAuth } from "../../context/AuthContext.jsx";
-import { canManageCustomers } from "../../lib/authz.js";
+import { canManageCustomers, canMarkOrderDelivered, canMutateOrder } from "../../lib/authz.js";
 import StatusBadge from "../components/StatusBadge.jsx";
 import { mealLabel } from "../../lib/constants.js";
 import OrderShareModal from "../components/OrderShareModal.jsx";
@@ -253,17 +253,52 @@ export default function CustomerDetail() {
                         ) : null}
                       </td>
                       <td className="px-3 py-2 text-right">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setShareModal(
-                              normalizeShareOrder(enrichShareOrder(o, customer))
-                            )
-                          }
-                          className="text-xs font-semibold text-emerald-700 hover:underline"
-                        >
-                          Share
-                        </button>
+                        <div className="flex flex-wrap justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setShareModal(normalizeShareOrder(enrichShareOrder(o, customer)))
+                            }
+                            className="text-xs font-semibold text-emerald-700 hover:underline"
+                          >
+                            Share
+                          </button>
+                          {o.status === "pending" && canMarkOrderDelivered(user) ? (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                navigate("/admin/orders", {
+                                  state: { deliverOrderId: o.id },
+                                })
+                              }
+                              className="text-xs font-semibold text-forest hover:underline"
+                            >
+                              Mark delivered
+                            </button>
+                          ) : null}
+                          {canMutateOrder(user, o) ? (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                navigate("/admin/orders", { state: { editOrderId: o.id } })
+                              }
+                              className="text-xs font-semibold text-forest hover:underline"
+                            >
+                              Edit
+                            </button>
+                          ) : null}
+                          {canMutateOrder(user, o) ? (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                navigate("/admin/orders", { state: { deleteOrderId: o.id } })
+                              }
+                              className="text-xs font-semibold text-rose-700 hover:underline"
+                            >
+                              Delete
+                            </button>
+                          ) : null}
+                        </div>
                       </td>
                     </tr>
                   ))

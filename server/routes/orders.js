@@ -143,6 +143,16 @@ const populateCustomer = {
   select: "first_name last_name mobile city maps_link",
 };
 
+const STAFF_PENDING_ONLY_MSG = "Only pending orders can be edited/deleted by staff.";
+
+async function respondWithOrder(res, id) {
+  const populated = await Order.findById(id).populate(populateCustomer).lean();
+  if (!populated) return res.status(404).json({ error: "Order not found" });
+  const shaped = withItems([populated])[0];
+  const [enriched] = await enrichOrdersWithInventory([shaped]);
+  return res.json(enriched);
+}
+
 r.get("/", requireAdminOrUser, async (req, res) => {
   try {
     const { status, createdBy } = req.query;
@@ -308,7 +318,7 @@ r.post("/:id/deliver", requireAdminOrUser, async (req, res) => {
   }
 });
 
-r.put("/:id", requireAdmin, async (req, res) => {
+r.put("/:id", requireAdminOrUser, async (req, res) => {
   try {
     const id = req.params.id;
     if (!mongoose.isValidObjectId(id)) {
@@ -316,6 +326,17 @@ r.put("/:id", requireAdmin, async (req, res) => {
     }
     const order = await Order.findById(id).lean();
     if (!order) return res.status(404).json({ error: "Order not found" });
+
+    const role = String(req.user?.role || "");
+    if (role === "user") {
+      if (order.status !== "pending") {
+        return res.status(403).json({ error: STAFF_PENDING_ONLY_MSG });
+      }
+      return updatePendingOrderAsStaff(req, res, order, id);
+    }
+    if (role !== "admin") {
+      return res.status(403).json({ error: "Forbidden" });
+    }
 
     const { customerId, items: itemsInput, status, paidTo, deliveredDate, deliveryAmount: deliveryAmountInput } = req.body || {};
     const cid = String(customerId);
@@ -408,12 +429,93 @@ r.put("/:id", requireAdmin, async (req, res) => {
   }
 });
 
-r.delete("/:id", requireAdmin, async (req, res) => {
+async function updatePendingOrderAsStaff(req, res, order, id) {
+  const { customerId, items: itemsInput, status, paidTo, deliveredDate, deliveryAmount: deliveryAmountInput } =
+    req.body || {};
+  const requestedStatus = String(status || "pending").toLowerCase();
+  if (requestedStatus !== "pending") {
+    return res.status(403).json({
+      error: "Staff cannot change order status from the edit form. Use Mark Delivered.",
+    });
+  }
+  if (paidTo != null || deliveredDate != null) {
+    return res.status(403).json({
+      error: "Staff cannot mark orders as delivered from the edit form. Use Mark Delivered.",
+    });
+  }
+
+  const cid = String(customerId);
+  const parsed = parseItems(itemsInput);
+  if (parsed.error) return res.status(400).json({ error: parsed.error });
+  const items = parsed.items;
+  const parsedDelivery = parseDeliveryAmount(deliveryAmountInput);
+  if (parsedDelivery.error) return res.status(400).json({ error: parsedDelivery.error });
+  const deliveryAmount = parsedDelivery.value;
+  const businessSubtotal = items.reduce((s, i) => s + i.subtotal, 0);
+  const totalPrice = businessSubtotal + deliveryAmount;
+  const totalQty = items.reduce((s, i) => s + i.quantity, 0);
+  const first = items[0];
+  if (!mongoose.isValidObjectId(cid)) {
+    return res.status(400).json({ error: "Customer not found" });
+  }
+  const cust = await Customer.findById(cid).select("_id").lean();
+  if (!cust) return res.status(400).json({ error: "Customer not found" });
+
+  const session = await mongoose.startSession();
+  try {
+    await session.withTransaction(async () => {
+      const hadAlloc = await orderHasAllocations(session, order._id);
+      if (hadAlloc) {
+        await reverseOrderAllocationsForOrder(session, order._id);
+      }
+      await Order.findByIdAndUpdate(
+        id,
+        {
+          customerId: cust._id,
+          mealType: first.mealType,
+          quantity: totalQty,
+          businessSubtotal,
+          deliveryAmount,
+          totalPrice,
+          status: "pending",
+          deliveredBy: null,
+          paidTo: null,
+          deliveredAt: null,
+          items: items.map((it) => ({
+            mealType: it.mealType,
+            quantity: it.quantity,
+            pricePerUnit: it.pricePerUnit,
+            subtotal: it.subtotal,
+          })),
+        },
+        { session }
+      );
+    });
+  } finally {
+    session.endSession();
+  }
+
+  return respondWithOrder(res, id);
+}
+
+r.delete("/:id", requireAdminOrUser, async (req, res) => {
   try {
     const id = req.params.id;
     if (!mongoose.isValidObjectId(id)) {
       return res.status(400).json({ error: "Invalid order id" });
     }
+    const order = await Order.findById(id).select("status").lean();
+    if (!order) return res.status(404).json({ error: "Order not found" });
+
+    const role = String(req.user?.role || "");
+    if (role === "user") {
+      if (order.status !== "pending") {
+        return res.status(403).json({ error: STAFF_PENDING_ONLY_MSG });
+      }
+    } else if (role !== "admin") {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
     await reverseOrderAllocationsForOrder(null, id);
     const existing = await Order.findByIdAndDelete(id);
     if (!existing) return res.status(404).json({ error: "Order not found" });

@@ -24,8 +24,15 @@ export const canViewBalance = isAdminOrStaff;
 export const canViewOrders = isAdminOrStaff;
 export const canCreateOrder = isAdminOrStaff;
 
-/** Full order mutation powers: edit/delete stay admin-only. */
+/** Full order edit/delete on any status (admin only). */
 export const canAdminMutateOrders = isAdmin;
+
+/** Staff may edit/delete only pending orders; admin may mutate any order. */
+export function canMutateOrder(user, order) {
+  if (isAdmin(user)) return true;
+  if (isStaffUser(user) && String(order?.status || "") === "pending") return true;
+  return false;
+}
 
 /** Mark delivered is allowed for admin and staff. */
 export const canMarkOrderDelivered = isAdminOrStaff;

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { api } from "../../api.js";
 import { MEAL_TYPES, PARTNERS, mealLabel } from "../../lib/constants.js";
 import { useAuth } from "../../context/AuthContext.jsx";
-import { canMarkOrderDelivered, isAdmin } from "../../lib/authz.js";
+import { canMarkOrderDelivered, canMutateOrder, isAdmin } from "../../lib/authz.js";
 import CustomerSearchSelect from "../components/CustomerSearchSelect.jsx";
 import Modal from "../components/Modal.jsx";
 import OrderShareModal from "../components/OrderShareModal.jsx";
@@ -15,6 +16,8 @@ function money(n) {
 
 export default function Orders() {
   const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const canAdminOrders = isAdmin(user);
   const canDeliverOrders = canMarkOrderDelivered(user);
   const [orders, setOrders] = useState([]);
@@ -70,6 +73,41 @@ export default function Orders() {
       .catch((e) => setErr(e.message))
       .finally(() => setLoading(false));
   }, [filterStatus, filterCreator]);
+
+  useEffect(() => {
+    const state = location.state;
+    if (!state || loading) return;
+    const { editOrderId, deleteOrderId, deliverOrderId } = state;
+    let handled = false;
+    if (editOrderId) {
+      const target = orders.find((o) => String(o.id) === String(editOrderId));
+      if (target && canMutateOrder(user, target)) {
+        openEdit(target);
+        handled = true;
+      }
+    }
+    if (deleteOrderId) {
+      const target = orders.find((o) => String(o.id) === String(deleteOrderId));
+      if (target && canMutateOrder(user, target)) {
+        setDeleteOrder(target);
+        handled = true;
+      }
+    }
+    if (deliverOrderId) {
+      const target = orders.find((o) => String(o.id) === String(deliverOrderId));
+      if (target?.status === "pending" && canDeliverOrders) {
+        setDeliverModal(target);
+        setDeliverForm({
+          paidTo: "elie",
+          deliveredDate: new Date().toISOString().slice(0, 10),
+        });
+        handled = true;
+      }
+    }
+    if (handled) {
+      navigate(location.pathname + location.search, { replace: true, state: {} });
+    }
+  }, [location.state, orders, loading, user, navigate, location.pathname, location.search]);
 
   const submitNew = async (e) => {
     e.preventDefault();
@@ -164,6 +202,7 @@ export default function Orders() {
     if (!editModal) return;
     setErr("");
     try {
+      const status = canAdminOrders ? editForm.status : "pending";
       await api(`/orders/${editModal.id}`, {
         method: "PUT",
         body: {
@@ -174,9 +213,9 @@ export default function Orders() {
             pricePerUnit: Number(it.pricePerUnit),
           })),
           deliveryAmount: Number(editForm.deliveryAmount || 0),
-          status: editForm.status,
-          paidTo: editForm.status === "delivered" ? editForm.paidTo : null,
-          deliveredDate: editForm.status === "delivered" ? editForm.deliveredDate : null,
+          status,
+          paidTo: canAdminOrders && status === "delivered" ? editForm.paidTo : null,
+          deliveredDate: canAdminOrders && status === "delivered" ? editForm.deliveredDate : null,
         },
       });
       setEditModal(null);
@@ -346,7 +385,7 @@ export default function Orders() {
                           Mark delivered
                         </button>
                       ) : null}
-                      {canAdminOrders ? (
+                      {canMutateOrder(user, o) ? (
                         <button
                           type="button"
                           onClick={() => openEdit(o)}
@@ -355,7 +394,7 @@ export default function Orders() {
                           Edit
                         </button>
                       ) : null}
-                      {canAdminOrders ? (
+                      {canMutateOrder(user, o) ? (
                         <button
                           type="button"
                           onClick={() => setDeleteOrder(o)}
@@ -658,20 +697,26 @@ export default function Orders() {
               ))}
             </select>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs font-medium text-slate-600">Status</label>
-              <select
-                className="mt-1 block w-full rounded-lg border-slate-300 text-sm"
-                value={editForm.status}
-                onChange={(e) => setEditForm((f) => ({ ...f, status: e.target.value }))}
-              >
-                <option value="pending">Pending</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
+          {canAdminOrders ? (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-medium text-slate-600">Status</label>
+                <select
+                  className="mt-1 block w-full rounded-lg border-slate-300 text-sm"
+                  value={editForm.status}
+                  onChange={(e) => setEditForm((f) => ({ ...f, status: e.target.value }))}
+                >
+                  <option value="pending">Pending</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
             </div>
-          </div>
+          ) : (
+            <p className="text-xs text-slate-500">
+              Status stays pending. Use Mark Delivered on the orders list when the order is ready.
+            </p>
+          )}
           <div>
             <label className="text-xs font-medium text-slate-600">Order items (qty = kg)</label>
             <div className="mt-2 space-y-2 rounded-lg border border-slate-200 p-3">
@@ -767,7 +812,7 @@ export default function Orders() {
               onChange={(e) => setEditForm((f) => ({ ...f, deliveryAmount: e.target.value }))}
             />
           </div>
-          {editForm.status === "delivered" ? (
+          {canAdminOrders && editForm.status === "delivered" ? (
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-slate-600">Paid to</label>
