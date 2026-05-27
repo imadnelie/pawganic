@@ -3,6 +3,7 @@ import { api } from "../../api.js";
 import { MEAL_TYPES, PARTNERS, mealLabel } from "../../lib/constants.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { canMarkOrderDelivered, isAdmin } from "../../lib/authz.js";
+import CustomerSearchSelect from "../components/CustomerSearchSelect.jsx";
 import Modal from "../components/Modal.jsx";
 import OrderShareModal from "../components/OrderShareModal.jsx";
 import StatusBadge from "../components/StatusBadge.jsx";
@@ -24,6 +25,7 @@ export default function Orders() {
   const [filterCreator, setFilterCreator] = useState("");
 
   const [newModal, setNewModal] = useState(false);
+  const [newCustomerError, setNewCustomerError] = useState("");
   const [newForm, setNewForm] = useState({
     customerId: "",
     items: [{ mealType: "chicken_with_rice", quantity: 1, pricePerUnit: "" }],
@@ -72,6 +74,18 @@ export default function Orders() {
   const submitNew = async (e) => {
     e.preventDefault();
     setErr("");
+    setNewCustomerError("");
+    if (!newForm.customerId) {
+      setNewCustomerError(
+        "Please select a customer from the list. Typing a name or number is not enough — tap a result to select."
+      );
+      return;
+    }
+    const customerExists = customers.some((c) => String(c.id) === String(newForm.customerId));
+    if (!customerExists) {
+      setNewCustomerError("Please select a valid customer from the list.");
+      return;
+    }
     try {
       const created = await api("/orders", {
         method: "POST",
@@ -86,6 +100,7 @@ export default function Orders() {
         },
       });
       setNewModal(false);
+      setNewCustomerError("");
       setNewForm({
         customerId: "",
         items: [{ mealType: "chicken_with_rice", quantity: 1, pricePerUnit: "" }],
@@ -192,7 +207,10 @@ export default function Orders() {
         </div>
         <button
           type="button"
-          onClick={() => setNewModal(true)}
+          onClick={() => {
+            setNewCustomerError("");
+            setNewModal(true);
+          }}
           className="w-full shrink-0 rounded-lg bg-forest px-4 py-3 text-sm font-semibold text-white hover:bg-forest/90 sm:w-auto sm:py-2"
         >
           New order
@@ -358,7 +376,10 @@ export default function Orders() {
       <Modal
         open={newModal}
         title="New order"
-        onClose={() => setNewModal(false)}
+        onClose={() => {
+          setNewCustomerError("");
+          setNewModal(false);
+        }}
         footer={
           <div className="flex justify-end gap-2">
             <button
@@ -381,20 +402,27 @@ export default function Orders() {
         {err && newModal ? <p className="mb-3 text-sm text-red-600">{err}</p> : null}
         <form id="new-order-form" onSubmit={submitNew} className="space-y-3">
           <div>
-            <label className="text-xs font-medium text-slate-600">Customer</label>
-            <select
-              required
-              className="mt-1 block w-full rounded-lg border-slate-300 text-sm"
+            <label className="text-xs font-medium text-slate-600" htmlFor="new-order-customer">
+              Customer
+            </label>
+            <CustomerSearchSelect
+              key={newModal ? "new-order-open" : "new-order-closed"}
+              inputId="new-order-customer"
+              customers={sortedCustomers}
               value={newForm.customerId}
-              onChange={(e) => setNewForm((f) => ({ ...f, customerId: e.target.value }))}
-            >
-              <option value="">Select…</option>
-              {sortedCustomers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.first_name} {c.last_name} — {c.mobile}
-                </option>
-              ))}
-            </select>
+              error={newCustomerError}
+              onChange={(customerId) => {
+                setNewCustomerError("");
+                setNewForm((f) => ({ ...f, customerId }));
+              }}
+              onBlurValidate={(query, customerId) => {
+                if (query.trim() && !customerId) {
+                  setNewCustomerError(
+                    "Please select a customer from the list. Typing a name or number is not enough — tap a result to select."
+                  );
+                }
+              }}
+            />
           </div>
           <div>
             <label className="text-xs font-medium text-slate-600">Order items (qty = kg)</label>
