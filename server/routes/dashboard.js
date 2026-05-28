@@ -18,6 +18,90 @@ function roundMoney(n) {
   return Math.round(x * 10000) / 10000;
 }
 
+function roundKg(n) {
+  const x = Number(n);
+  if (!Number.isFinite(x)) return 0;
+  return Math.round(x * 1000) / 1000;
+}
+
+const MEAL_SALES_KG_FIELD = {
+  chicken_with_rice: "chickenRiceKg",
+  beef_with_rice: "beefRiceKg",
+  fish_with_rice: "fishRiceKg",
+};
+
+function emptyMealSalesKg() {
+  return { chickenRiceKg: 0, beefRiceKg: 0, fishRiceKg: 0, totalKg: 0 };
+}
+
+function rowsToMealSalesKg(rows) {
+  const out = emptyMealSalesKg();
+  for (const row of rows || []) {
+    const field = MEAL_SALES_KG_FIELD[String(row._id || "")];
+    if (!field) continue;
+    out[field] = roundKg(out[field] + num(row.kg));
+  }
+  out.totalKg = roundKg(out.chickenRiceKg + out.beefRiceKg + out.fishRiceKg);
+  return out;
+}
+
+function startOfCurrentMonth() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1);
+}
+
+async function aggregateDeliveredMealKg(salesDateFrom = null) {
+  const pipeline = [
+    { $match: { status: "delivered" } },
+    {
+      $addFields: {
+        salesDate: { $ifNull: ["$deliveredAt", "$createdAt"] },
+        lineItems: {
+          $cond: {
+            if: { $gt: [{ $size: { $ifNull: ["$items", []] } }, 0] },
+            then: "$items",
+            else: [
+              {
+                mealType: "$mealType",
+                quantity: { $ifNull: ["$quantity", 0] },
+              },
+            ],
+          },
+        },
+      },
+    },
+  ];
+  if (salesDateFrom) {
+    pipeline.push({ $match: { salesDate: { $gte: salesDateFrom } } });
+  }
+  pipeline.push(
+    { $unwind: "$lineItems" },
+    {
+      $group: {
+        _id: "$lineItems.mealType",
+        kg: { $sum: { $ifNull: ["$lineItems.quantity", 0] } },
+      },
+    }
+  );
+  return Order.aggregate(pipeline);
+}
+
+r.get("/meal-sales-quantity", requireAdminOrUser, async (req, res) => {
+  try {
+    const monthStart = startOfCurrentMonth();
+    const [allTimeRows, monthRows] = await Promise.all([
+      aggregateDeliveredMealKg(),
+      aggregateDeliveredMealKg(monthStart),
+    ]);
+    res.json({
+      allTime: rowsToMealSalesKg(allTimeRows),
+      thisMonth: rowsToMealSalesKg(monthRows),
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message || "Server error" });
+  }
+});
+
 r.get("/summary", requireAdminOrUser, async (req, res) => {
   try {
     const customers = await Customer.countDocuments();

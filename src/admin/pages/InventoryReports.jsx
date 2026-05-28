@@ -6,8 +6,41 @@ function money(n) {
   return new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(n);
 }
 
+function formatKg(n) {
+  const x = Number(n);
+  if (!Number.isFinite(x)) return "0";
+  return x % 1 === 0 ? String(x) : x.toFixed(3).replace(/\.?0+$/, "");
+}
+
+function MealSalesQuantityBlock({ title, data }) {
+  if (!data) return null;
+  const rows = [
+    { label: "Chicken Rice", value: data.chickenRiceKg },
+    { label: "Beef Rice", value: data.beefRiceKg },
+    { label: "Fish Rice", value: data.fishRiceKg },
+  ];
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
+      <dl className="mt-3 space-y-2">
+        {rows.map((r) => (
+          <div key={r.label} className="flex justify-between gap-3 text-sm">
+            <dt className="text-slate-600">{r.label}</dt>
+            <dd className="font-semibold tabular-nums text-slate-900">{formatKg(r.value)} kg</dd>
+          </div>
+        ))}
+        <div className="flex justify-between gap-3 border-t border-slate-100 pt-2 text-sm">
+          <dt className="font-semibold text-slate-900">Total</dt>
+          <dd className="font-bold tabular-nums text-forest">{formatKg(data.totalKg)} kg</dd>
+        </div>
+      </dl>
+    </div>
+  );
+}
+
 export default function InventoryReports() {
   const [summary, setSummary] = useState(null);
+  const [mealSales, setMealSales] = useState(null);
   const [finished, setFinished] = useState(null);
   const [batches, setBatches] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -17,12 +50,14 @@ export default function InventoryReports() {
   useEffect(() => {
     setLoading(true);
     Promise.all([
+      api("/dashboard/meal-sales-quantity"),
       api("/inventory/reports/summary"),
       api("/inventory/finished-stock"),
       api("/inventory/batches"),
       api("/inventory/reports/order-profit?limit=150"),
     ])
-      .then(([s, f, b, o]) => {
+      .then(([sales, s, f, b, o]) => {
+        setMealSales(sales);
         setSummary(s);
         setFinished(f);
         setBatches(b);
@@ -46,6 +81,17 @@ export default function InventoryReports() {
       </div>
 
       {err ? <p className="text-sm text-red-600">{err}</p> : null}
+
+      <section>
+        <h2 className="text-lg font-semibold text-slate-900">Sales quantity summary</h2>
+        <p className="mt-1 text-sm text-slate-500">
+          Kilograms sold by meal type from <strong>delivered</strong> orders only (pending and cancelled excluded).
+        </p>
+        <div className="mt-3 grid gap-4 sm:grid-cols-2">
+          <MealSalesQuantityBlock title="This month" data={mealSales?.thisMonth} />
+          <MealSalesQuantityBlock title="All time" data={mealSales?.allTime} />
+        </div>
+      </section>
 
       <section>
         <h2 className="text-lg font-semibold text-slate-900">A. Ingredient & supply inventory</h2>

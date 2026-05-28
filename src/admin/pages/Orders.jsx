@@ -14,6 +14,126 @@ function money(n) {
   return new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(n);
 }
 
+function orderMealSummary(order) {
+  return (order.items || []).map((it) => mealLabel(it.mealType)).join(", ") || "—";
+}
+
+function orderQtyKg(order) {
+  return (order.items || []).reduce((s, it) => s + Number(it.quantity || 0), 0);
+}
+
+function OrderDetailRow({ label, children }) {
+  return (
+    <div className="flex items-start justify-between gap-3 text-sm">
+      <span className="shrink-0 text-slate-500">{label}</span>
+      <span className="min-w-0 text-right font-medium text-slate-900">{children}</span>
+    </div>
+  );
+}
+
+function OrderActions({
+  order,
+  user,
+  canDeliverOrders,
+  onShare,
+  onDeliver,
+  onEdit,
+  onDelete,
+  variant = "desktop",
+}) {
+  const linkClass =
+    variant === "mobile"
+      ? "min-h-[44px] rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold active:bg-slate-50"
+      : "text-xs font-semibold hover:underline";
+  const shareClass =
+    variant === "mobile" ? `${linkClass} border-emerald-200 text-emerald-800` : `${linkClass} text-emerald-700`;
+  const deliverClass =
+    variant === "mobile" ? `${linkClass} border-forest/30 text-forest` : `${linkClass} text-forest`;
+  const editClass = variant === "mobile" ? `${linkClass} text-forest` : `${linkClass} text-forest`;
+  const deleteClass =
+    variant === "mobile" ? `${linkClass} border-rose-200 text-rose-700` : `${linkClass} text-rose-700`;
+
+  return (
+    <div className={`flex flex-wrap gap-2 ${variant === "desktop" ? "justify-end" : ""}`}>
+      <button type="button" onClick={() => onShare(order)} className={shareClass}>
+        Share
+      </button>
+      {order.status === "pending" && canDeliverOrders ? (
+        <button type="button" onClick={() => onDeliver(order)} className={deliverClass}>
+          Mark delivered
+        </button>
+      ) : null}
+      {canMutateOrder(user, order) ? (
+        <button type="button" onClick={() => onEdit(order)} className={editClass}>
+          Edit
+        </button>
+      ) : null}
+      {canMutateOrder(user, order) ? (
+        <button type="button" onClick={() => onDelete(order)} className={deleteClass}>
+          Delete
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+function OrderMobileCard({
+  order,
+  user,
+  canDeliverOrders,
+  onShare,
+  onDeliver,
+  onEdit,
+  onDelete,
+}) {
+  const foodSubtotal = Number(order.businessSubtotal ?? order.totalPrice ?? 0);
+  return (
+    <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Customer</p>
+          <p className="text-base font-semibold text-slate-900">
+            {order.customerFirstName} {order.customerLastName}
+          </p>
+        </div>
+        <StatusBadge status={order.status} />
+      </div>
+
+      <div className="mt-3 space-y-2 border-t border-slate-100 pt-3">
+        <OrderDetailRow label="Meal">{orderMealSummary(order)}</OrderDetailRow>
+        <OrderDetailRow label="Qty">{orderQtyKg(order)} kg</OrderDetailRow>
+        <OrderDetailRow label="Food subtotal">{money(foodSubtotal)}</OrderDetailRow>
+        <OrderDetailRow label="Delivery">{money(order.deliveryAmount || 0)}</OrderDetailRow>
+        <OrderDetailRow label="Grand total">
+          <span className="font-bold text-forest">{money(order.totalPrice)}</span>
+        </OrderDetailRow>
+        <OrderDetailRow label="Created by">
+          <span className="capitalize">{order.createdBy || "—"}</span>
+        </OrderDetailRow>
+        <OrderDetailRow label="Paid to">
+          <span className="capitalize">{order.paidTo || "—"}</span>
+        </OrderDetailRow>
+        <OrderDetailRow label="Created">
+          {order.createdAt ? new Date(order.createdAt).toLocaleString() : "—"}
+        </OrderDetailRow>
+      </div>
+
+      <div className="mt-4 border-t border-slate-100 pt-3">
+        <OrderActions
+          order={order}
+          user={user}
+          canDeliverOrders={canDeliverOrders}
+          onShare={onShare}
+          onDeliver={onDeliver}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          variant="mobile"
+        />
+      </div>
+    </article>
+  );
+}
+
 export default function Orders() {
   const { user } = useAuth();
   const location = useLocation();
@@ -24,7 +144,7 @@ export default function Orders() {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
+  const [filterStatus, setFilterStatus] = useState("pending");
   const [filterCreator, setFilterCreator] = useState("");
 
   const [newModal, setNewModal] = useState(false);
@@ -262,10 +382,10 @@ export default function Orders() {
       </p>
 
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-        <div>
+        <div className="w-full min-w-0 sm:w-auto">
           <label className="text-xs text-slate-500">Status</label>
           <select
-            className="mt-1 block rounded-lg border-slate-300 text-sm"
+            className="mt-1 block w-full rounded-lg border-slate-300 text-sm sm:w-auto"
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
           >
@@ -275,10 +395,10 @@ export default function Orders() {
             <option value="cancelled">Cancelled</option>
           </select>
         </div>
-        <div>
+        <div className="w-full min-w-0 sm:w-auto">
           <label className="text-xs text-slate-500">Created by</label>
           <select
-            className="mt-1 block rounded-lg border-slate-300 text-sm"
+            className="mt-1 block w-full rounded-lg border-slate-300 text-sm sm:w-auto"
             value={filterCreator}
             onChange={(e) => setFilterCreator(e.target.value)}
           >
@@ -296,7 +416,38 @@ export default function Orders() {
         <p className="mt-4 text-sm text-red-600">{err}</p>
       ) : null}
 
-      <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="mt-6 space-y-3 lg:hidden">
+        {loading ? (
+          <p className="rounded-xl border border-slate-200 bg-white px-4 py-8 text-center text-sm text-slate-500 shadow-sm">
+            Loading…
+          </p>
+        ) : orders.length === 0 ? (
+          <p className="rounded-xl border border-slate-200 bg-white px-4 py-8 text-center text-sm text-slate-500 shadow-sm">
+            No orders match filters.
+          </p>
+        ) : (
+          orders.map((o) => (
+            <OrderMobileCard
+              key={o.id}
+              order={o}
+              user={user}
+              canDeliverOrders={canDeliverOrders}
+              onShare={(order) => setShareModal(enrichOrderForShare(order))}
+              onDeliver={(order) => {
+                setDeliverModal(order);
+                setDeliverForm({
+                  paidTo: "elie",
+                  deliveredDate: new Date().toISOString().slice(0, 10),
+                });
+              }}
+              onEdit={openEdit}
+              onDelete={setDeleteOrder}
+            />
+          ))
+        )}
+      </div>
+
+      <div className="mt-6 hidden overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm lg:block">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
           <thead className="bg-slate-50">
             <tr>
@@ -362,48 +513,22 @@ export default function Orders() {
                     {o.createdAt ? new Date(o.createdAt).toLocaleString() : "—"}
                   </td>
                   <td className="px-3 py-3 text-right">
-                    <div className="flex justify-end gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setShareModal(enrichOrderForShare(o))}
-                        className="text-xs font-semibold text-emerald-700 hover:underline"
-                      >
-                        Share
-                      </button>
-                      {o.status === "pending" && canDeliverOrders ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDeliverModal(o);
-                            setDeliverForm({
-                              paidTo: "elie",
-                              deliveredDate: new Date().toISOString().slice(0, 10),
-                            });
-                          }}
-                          className="text-xs font-semibold text-forest hover:underline"
-                        >
-                          Mark delivered
-                        </button>
-                      ) : null}
-                      {canMutateOrder(user, o) ? (
-                        <button
-                          type="button"
-                          onClick={() => openEdit(o)}
-                          className="text-xs font-semibold text-forest hover:underline"
-                        >
-                          Edit
-                        </button>
-                      ) : null}
-                      {canMutateOrder(user, o) ? (
-                        <button
-                          type="button"
-                          onClick={() => setDeleteOrder(o)}
-                          className="text-xs font-semibold text-rose-700 hover:underline"
-                        >
-                          Delete
-                        </button>
-                      ) : null}
-                    </div>
+                    <OrderActions
+                      order={o}
+                      user={user}
+                      canDeliverOrders={canDeliverOrders}
+                      onShare={(order) => setShareModal(enrichOrderForShare(order))}
+                      onDeliver={(order) => {
+                        setDeliverModal(order);
+                        setDeliverForm({
+                          paidTo: "elie",
+                          deliveredDate: new Date().toISOString().slice(0, 10),
+                        });
+                      }}
+                      onEdit={openEdit}
+                      onDelete={setDeleteOrder}
+                      variant="desktop"
+                    />
                   </td>
                 </tr>
               ))
