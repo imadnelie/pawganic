@@ -30,6 +30,25 @@ function defaultPaidBy(user) {
   return u === "elie" || u === "jimmy" ? u : "elie";
 }
 
+function applySelectedInventoryItem(line, itemId, catalog) {
+  if (!itemId) {
+    return {
+      ...emptyLine(),
+      quantityPurchased: line.quantityPurchased,
+      totalCost: line.totalCost,
+      notes: line.notes,
+    };
+  }
+  const it = catalog.find((i) => String(i.id) === String(itemId));
+  return {
+    ...line,
+    inventoryItemId: itemId,
+    itemName: it?.name ?? line.itemName,
+    category: it?.category ?? line.category,
+    unit: it?.unit ?? line.unit,
+  };
+}
+
 export default function Purchases() {
   const { user } = useAuth();
   const showDelete = canDeletePurchase(user);
@@ -372,7 +391,7 @@ export default function Purchases() {
                     onChange={(e) =>
                       setAddForm((f) => {
                         const lines = [...f.lines];
-                        lines[idx] = { ...lines[idx], inventoryItemId: e.target.value };
+                        lines[idx] = applySelectedInventoryItem(lines[idx], e.target.value, items);
                         return { ...f, lines };
                       })
                     }
@@ -385,6 +404,12 @@ export default function Purchases() {
                     ))}
                   </select>
                 </div>
+                {ln.inventoryItemId ? (
+                  <p className="text-xs text-slate-600">
+                    Unit: <span className="font-semibold text-slate-800">{ln.unit}</span> · Category:{" "}
+                    <span className="font-semibold capitalize text-slate-800">{ln.category?.replace(/_/g, " ")}</span>
+                  </p>
+                ) : null}
                 {!ln.inventoryItemId ? (
                   <>
                     <input

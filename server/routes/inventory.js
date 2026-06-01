@@ -104,17 +104,10 @@ r.get("/stock", requireAdminOrUser, async (req, res) => {
 });
 
 async function resolveInventoryItemForLine(bodyLine, session) {
-  const unit = String(bodyLine?.unit || "").trim();
+  const payloadUnit = String(bodyLine?.unit || "").trim();
   const category = String(bodyLine?.category || "").trim();
   const itemName = String(bodyLine?.itemName || "").trim();
   const inventoryItemId = bodyLine?.inventoryItemId != null ? String(bodyLine.inventoryItemId) : "";
-
-  if (!INVENTORY_MODEL_CONSTANTS.UNIT_TYPES.includes(unit)) {
-    throw new Error("Invalid unit type on purchase line");
-  }
-  if (!INVENTORY_MODEL_CONSTANTS.INVENTORY_CATEGORIES.includes(category)) {
-    throw new Error("Invalid category on purchase line");
-  }
 
   if (inventoryItemId) {
     if (!mongoose.isValidObjectId(inventoryItemId)) throw new Error("Invalid inventory item id");
@@ -122,8 +115,25 @@ async function resolveInventoryItemForLine(bodyLine, session) {
     if (session) iq = iq.session(session);
     const existing = await iq;
     if (!existing) throw new Error("Inventory item not found");
-    if (String(existing.unit) !== unit) throw new Error("Unit does not match inventory item");
+    const storedUnit = String(existing.unit);
+    if (payloadUnit !== storedUnit) {
+      console.warn("[purchase] unit mismatch (using stored inventory item unit)", {
+        inventoryItemId,
+        itemName: existing.name,
+        storedUnit,
+        payloadUnit: payloadUnit || "(empty)",
+        comparison: `String(existing.unit) !== String(bodyLine.unit) → ${JSON.stringify(storedUnit)} !== ${JSON.stringify(payloadUnit)}`,
+      });
+    }
     return existing;
+  }
+
+  const unit = payloadUnit;
+  if (!INVENTORY_MODEL_CONSTANTS.UNIT_TYPES.includes(unit)) {
+    throw new Error("Invalid unit type on purchase line");
+  }
+  if (!INVENTORY_MODEL_CONSTANTS.INVENTORY_CATEGORIES.includes(category)) {
+    throw new Error("Invalid category on purchase line");
   }
 
   if (!itemName) throw new Error("Item name is required when inventoryItemId is omitted");
