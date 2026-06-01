@@ -1,25 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { api } from "../../api.js";
-import { MEAL_TYPES, PARTNERS, mealLabel } from "../../lib/constants.js";
+import { MEAL_TYPES, PARTNERS } from "../../lib/constants.js";
+import { formatKg, orderItemBreakdownTotalKg, sumPendingOrderKg } from "../../lib/productKg.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { canMarkOrderDelivered, canMutateOrder, isAdmin } from "../../lib/authz.js";
 import CustomerSearchSelect from "../components/CustomerSearchSelect.jsx";
 import Modal from "../components/Modal.jsx";
+import OrderItemsBreakdown from "../components/OrderItemsBreakdown.jsx";
 import OrderShareModal from "../components/OrderShareModal.jsx";
+import ProductKgSummaryCards from "../components/ProductKgSummaryCards.jsx";
 import StatusBadge from "../components/StatusBadge.jsx";
 import { enrichShareOrder, normalizeShareOrder } from "../utils/orderShare.js";
 
 function money(n) {
   return new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(n);
-}
-
-function orderMealSummary(order) {
-  return (order.items || []).map((it) => mealLabel(it.mealType)).join(", ") || "—";
-}
-
-function orderQtyKg(order) {
-  return (order.items || []).reduce((s, it) => s + Number(it.quantity || 0), 0);
 }
 
 function OrderDetailRow({ label, children }) {
@@ -100,8 +95,13 @@ function OrderMobileCard({
       </div>
 
       <div className="mt-3 space-y-2 border-t border-slate-100 pt-3">
-        <OrderDetailRow label="Meal">{orderMealSummary(order)}</OrderDetailRow>
-        <OrderDetailRow label="Qty">{orderQtyKg(order)} kg</OrderDetailRow>
+        <div className="text-sm">
+          <div className="text-slate-500">Items</div>
+          <div className="mt-1">
+            <OrderItemsBreakdown order={order} compact />
+          </div>
+        </div>
+        <OrderDetailRow label="Total items">{formatKg(orderItemBreakdownTotalKg(order))} kg</OrderDetailRow>
         <OrderDetailRow label="Food subtotal">{money(foodSubtotal)}</OrderDetailRow>
         <OrderDetailRow label="Delivery">{money(order.deliveryAmount || 0)}</OrderDetailRow>
         <OrderDetailRow label="Grand total">
@@ -276,6 +276,9 @@ export default function Orders() {
     `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`)
   );
 
+  const pendingDemandKg = useMemo(() => sumPendingOrderKg(orders), [orders]);
+  const showPendingSummary = filterStatus === "pending";
+
   const enrichOrderForShare = (order) =>
     normalizeShareOrder(enrichShareOrder(order, customers));
 
@@ -416,6 +419,15 @@ export default function Orders() {
         <p className="mt-4 text-sm text-red-600">{err}</p>
       ) : null}
 
+      {showPendingSummary ? (
+        <ProductKgSummaryCards
+          title="Pending order demand"
+          subtitle="Kg needed from pending orders in this list (delivered and cancelled excluded)."
+          totals={pendingDemandKg}
+          suffix="pending"
+        />
+      ) : null}
+
       <div className="mt-6 space-y-3 lg:hidden">
         {loading ? (
           <p className="rounded-xl border border-slate-200 bg-white px-4 py-8 text-center text-sm text-slate-500 shadow-sm">
@@ -487,11 +499,11 @@ export default function Orders() {
                   <td className="whitespace-nowrap px-3 py-3 font-medium text-slate-900">
                     {o.customerFirstName} {o.customerLastName}
                   </td>
-                  <td className="px-3 py-3 text-slate-600">
-                    {(o.items || []).map((it) => mealLabel(it.mealType)).join(", ")}
+                  <td className="max-w-[200px] px-3 py-3 text-slate-600">
+                    <OrderItemsBreakdown order={o} showTotal={false} />
                   </td>
-                  <td className="px-3 py-3 text-slate-600">
-                    {(o.items || []).reduce((s, it) => s + Number(it.quantity || 0), 0)}
+                  <td className="whitespace-nowrap px-3 py-3 text-right tabular-nums text-slate-600">
+                    {formatKg(orderItemBreakdownTotalKg(o))} kg
                   </td>
                   <td className="px-3 py-3 text-slate-600">
                     <div className="text-xs">Subtotal: {money(o.businessSubtotal ?? o.totalPrice ?? 0)}</div>

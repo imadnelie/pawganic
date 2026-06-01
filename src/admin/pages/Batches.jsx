@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "../../api.js";
 import { FINISHED_PRODUCT_TYPES } from "../../lib/constants.js";
+import { sumBatchRemainingKg } from "../../lib/productKg.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { canDeleteBatch } from "../../lib/authz.js";
 import Modal from "../components/Modal.jsx";
+import ProductKgSummaryCards from "../components/ProductKgSummaryCards.jsx";
 
 function money(n) {
   return new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(n);
@@ -56,6 +58,8 @@ export default function Batches() {
   useEffect(() => {
     load().finally(() => setLoading(false));
   }, []);
+
+  const batchAvailableKg = useMemo(() => sumBatchRemainingKg(rows), [rows]);
 
   const submitAdd = async (e) => {
     e.preventDefault();
@@ -128,6 +132,13 @@ export default function Batches() {
       </div>
 
       {err && !addOpen && !deleteTarget ? <p className="mt-4 text-sm text-red-600">{err}</p> : null}
+
+      <ProductKgSummaryCards
+        title="Finished stock available"
+        subtitle="Sum of remaining kg across all production batches (not output kg)."
+        totals={batchAvailableKg}
+        suffix="available"
+      />
 
       <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
